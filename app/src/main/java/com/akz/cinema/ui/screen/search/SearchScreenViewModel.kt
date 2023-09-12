@@ -1,7 +1,6 @@
 package com.akz.cinema.ui.screen.search
 
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -26,9 +25,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,10 +54,14 @@ class SearchScreenViewModel @Inject constructor(
     @OptIn(FlowPreview::class)
     private val searchQueryDebounced = snapshotFlow { searchQuery }.debounce(1000).onEach {
         if (it.isNotBlank()) {
-            val result = movieRepository.searchMovieByQuery(it)
-            isHistoryBeingServed = false
-            _searchResults.update {
-                result
+            try {
+                val result = movieRepository.searchMovieByQuery(it)
+                isHistoryBeingServed = false
+                _searchResults.update {
+                    result
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         } else {
             isHistoryBeingServed = true
