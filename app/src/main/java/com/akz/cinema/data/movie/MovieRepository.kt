@@ -1,11 +1,15 @@
 package com.akz.cinema.data.movie
 
 import android.content.Context
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.akz.cinema.data.movie.source.local.LocalMovieDao
 import com.akz.cinema.data.movie.source.local.recent.LocalRecentMovieDao
 import com.akz.cinema.data.movie.source.local.recent.toMovies
 import com.akz.cinema.data.movie.source.local.toMovies
 import com.akz.cinema.data.movie.source.remote.MovieApi
+import com.akz.cinema.data.movie.source.remote.NowPlayingPagingSource
 import com.akz.cinema.data.movie.source.remote.toMovies
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +36,13 @@ class MovieRepository @Inject constructor(
             }
         }
         return movies
+    }
+
+    fun getNowPlayingMoviesStream(): Flow<PagingData<Movie>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+            pagingSourceFactory = { NowPlayingPagingSource(movieApi) }
+        ).flow
     }
 
     suspend fun saveMoviesToLocal(movies: List<Movie>) {

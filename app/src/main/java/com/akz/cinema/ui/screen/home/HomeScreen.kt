@@ -45,8 +45,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import com.akz.cinema.LocalPaddings
+import com.akz.cinema.data.movie.Movie
 import com.akz.cinema.ui.components.SaveMoviesInteraction
 import com.akz.cinema.ui.components.SearchInteraction
 
@@ -60,6 +64,7 @@ fun HomeScreen(
     onSearchIconPressed: () -> Unit,
 ) {
     val movies by viewModel.moviesOfWeek.collectAsStateWithLifecycle()
+    val moviesStream = viewModel.nowPlayingMoviesStream.collectAsLazyPagingItems()
     val lf = LocalLifecycleOwner.current.lifecycle
     val context = LocalContext.current
     val vibrator = remember {
@@ -115,69 +120,72 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+
                 items(
-                    items = movies,
-//                    key = {
-//                        it.id
-//                    }
-                ) { movie ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth(0.9f)
-                            .height(400.dp),
-                        onClick = {
-                            onDetailPressed(movie.id)
-                        }
-                    ) {
-                        movie.backdropPath?.let { backDrop ->
-                            AsyncImage(
-                                model = "https://image.tmdb.org/t/p/w500/$backDrop",
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
+                    count = moviesStream.itemCount,
+                    key = moviesStream.itemKey { it.id },
+                    contentType = moviesStream.itemContentType { Movie::class.java }
+                ) {
+                    val item = moviesStream[it]
+                    item?.let { movie ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .height(400.dp),
+                            onClick = {
+                                onDetailPressed(movie.id)
+                            }
+                        ) {
+                            movie.backdropPath?.let { backDrop ->
+                                AsyncImage(
+                                    model = "https://image.tmdb.org/t/p/w500/$backDrop",
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                )
+                            }
+                            Spacer(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(200.dp)
+                                    .height(16.dp)
                             )
-                        }
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(16.dp)
-                        )
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 8.dp)
-                                .padding(bottom = 16.dp),
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = movie.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-                            if (movie.isAdult) {
-                                Box(
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp)
+                                    .padding(bottom = 16.dp),
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = movie.title,
+                                    style = MaterialTheme.typography.titleLarge,
                                     modifier = Modifier.padding(vertical = 8.dp)
-                                ) {
-                                    Text(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(
-                                                color = Color.Red.copy(alpha = 0.6f)
-                                            )
-                                            .padding(8.dp),
-                                        text = "Adult"
-                                    )
+                                )
+                                if (movie.isAdult) {
+                                    Box(
+                                        modifier = Modifier.padding(vertical = 8.dp)
+                                    ) {
+                                        Text(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(
+                                                    color = Color.Red.copy(alpha = 0.6f)
+                                                )
+                                                .padding(8.dp),
+                                            text = "Adult"
+                                        )
+                                    }
                                 }
+                                Text(
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    text = movie.overview,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
-                            Text(
-                                modifier = Modifier.padding(top = 8.dp),
-                                text = movie.overview,
-                                style = MaterialTheme.typography.bodySmall,
-                                overflow = TextOverflow.Ellipsis
-                            )
                         }
                     }
                 }

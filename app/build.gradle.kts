@@ -83,6 +83,7 @@ dependencies {
     val lifecycleVersion = "2.6.2"
     val material3Version = "1.2.0-alpha07"
     val roomVersion = "2.5.2"
+    val pagingVersion = "3.2.1"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.0"))
@@ -142,7 +143,12 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
+    implementation("androidx.room:room-paging:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
+
+    // paging3
+    implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
+    implementation("androidx.paging:paging-compose:$pagingVersion")
 
     //truth
     testImplementation("com.google.truth:truth:1.1.5")

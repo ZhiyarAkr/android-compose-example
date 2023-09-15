@@ -8,7 +8,7 @@ class TMDBHeaderInterceptor: Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
             .newBuilder()
-            .addHeader("Authorization", ACCESS_TOKEN)
+            .addHeader("Authorization", "Bearer $ACCESS_TOKEN")
             .build()
         return chain.proceed(request)
     }

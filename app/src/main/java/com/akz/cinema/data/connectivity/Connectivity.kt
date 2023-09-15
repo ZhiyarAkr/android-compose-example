@@ -1,25 +1,22 @@
 package com.akz.cinema.data.connectivity
 
-import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import androidx.core.content.ContextCompat.getSystemService
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 class Connectivity @Inject constructor(
-    private val networkRequest: NetworkRequest,
+    private val connectivityManager: ConnectivityManager
 ) {
-    companion object {
-        private val _isConnected: MutableStateFlow<Boolean> = MutableStateFlow(false)
-        val isConnected = _isConnected.asStateFlow()
-    }
+    private val _isConnected: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val isConnected: Flow<Boolean> = _isConnected
 
-    fun init(context: Context) {
+
+    init {
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
@@ -33,7 +30,8 @@ class Connectivity @Inject constructor(
                 networkCapabilities: NetworkCapabilities
             ) {
                 super.onCapabilitiesChanged(network, networkCapabilities)
-                val unMetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                val unMetered =
+                    networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
                 _isConnected.update {
                     unMetered
                 }
@@ -47,11 +45,13 @@ class Connectivity @Inject constructor(
             }
         }
 
-        val connectivityManager = getSystemService(
-            context,
-            ConnectivityManager::class.java
-        ) as ConnectivityManager
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build()
 
-        connectivityManager.requestNetwork(networkRequest, networkCallback)
+        connectivityManager.requestNetwork(request, networkCallback)
     }
 }

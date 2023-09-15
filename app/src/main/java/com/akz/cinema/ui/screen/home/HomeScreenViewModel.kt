@@ -7,6 +7,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.flatMap
 import com.akz.cinema.data.connectivity.Connectivity
 import com.akz.cinema.data.movie.Movie
 import com.akz.cinema.data.movie.MovieRepository
@@ -26,12 +29,21 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val movieRepository: MovieRepository,
+    private val connectivity: Connectivity
 ) : ViewModel() {
     private val _moviesOfWeek: MutableStateFlow<List<Movie>> = MutableStateFlow(emptyList())
     val moviesOfWeek = _moviesOfWeek.asStateFlow()
 
     var topPadding by mutableStateOf(0.dp)
         private set
+
+    val nowPlayingMoviesStream = movieRepository.getNowPlayingMoviesStream()
+        .cachedIn(viewModelScope)
+        .stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        PagingData.empty()
+    )
 
 
     private val localMovies: StateFlow<LocalResult> =
@@ -44,7 +56,7 @@ class HomeScreenViewModel @Inject constructor(
                 LocalResult.Loading
             )
 
-    private val isConnected = Connectivity.isConnected
+    private val isConnected = connectivity.isConnected
         .onEach {
             if (it) {
                 if (_moviesOfWeek.value.isEmpty()) {

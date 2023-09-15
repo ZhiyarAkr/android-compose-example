@@ -43,7 +43,8 @@ fun HomeTopAppBar(
                     scope.launch {
                         interactionSource.emit(SaveMoviesInteraction())
                     }
-                }
+                },
+                enabled = false
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.baseline_bookmark_border_24),
