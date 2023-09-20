@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,13 +43,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import okhttp3.internal.checkDuration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchScreenViewModel = hiltViewModel(),
-    onDetailPressed: (Int) -> Unit
+    onDetailPressed: (Int) -> Unit,
+    onBackPressed: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -62,6 +64,16 @@ fun SearchScreen(
         val keyboardController = LocalSoftwareKeyboardController.current
         val context = LocalContext.current
 
+        IconButton(
+            onClick = onBackPressed,
+            modifier = Modifier.align(Alignment.Center)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                contentDescription = "Back"
+            )
+        }
+
         SearchBar(
             modifier = Modifier.align(Alignment.TopCenter),
             query = viewModel.searchQuery,
@@ -75,7 +87,7 @@ fun SearchScreen(
             },
             active = viewModel.isSearchBarActive,
             onActiveChange = {
-                 viewModel.updateIsSearchBarActive(it)
+                viewModel.updateIsSearchBarActive(it)
             },
             placeholder = {
                 Text(text = "Search movies...")
@@ -141,7 +153,8 @@ fun SearchScreen(
                         },
                         leadingContent = {
                             movie.backdropPath?.let { backDrop ->
-                                val path = if (movie.isImagePathAbsolute) backDrop else "https://image.tmdb.org/t/p/w500/$backDrop"
+                                val path =
+                                    if (movie.isImagePathAbsolute) backDrop else "https://image.tmdb.org/t/p/w500/$backDrop"
                                 AsyncImage(
                                     model = path,
                                     contentDescription = "Movie Photo",

@@ -95,7 +95,8 @@ fun AppNavigation(
                 searchScreenNavGraph(
                     onDetailPressed = { movieId ->
                         navController.navigateToDetailScreen(movieId)
-                    }
+                    },
+                    onBackPressed = navController::popBackStack
                 )
             }
         }

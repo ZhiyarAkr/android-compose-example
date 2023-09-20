@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -28,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
@@ -63,7 +60,7 @@ fun HomeScreen(
     onDetailPressed: (Int) -> Unit,
     onSearchIconPressed: () -> Unit,
 ) {
-    val movies by viewModel.moviesOfWeek.collectAsStateWithLifecycle()
+//    val movies by viewModel.moviesOfWeek.collectAsStateWithLifecycle()
     val moviesStream = viewModel.nowPlayingMoviesStream.collectAsLazyPagingItems()
     val lf = LocalLifecycleOwner.current.lifecycle
     val context = LocalContext.current
@@ -76,7 +73,7 @@ fun HomeScreen(
             interactionSource.interactions.collect {
                 when (it) {
                     is SaveMoviesInteraction -> {
-                        viewModel.onEvent(HomeEvent.SaveAllMovies)
+                        viewModel.onEvent(HomeEvent.SaveAllMovies(moviesStream.itemSnapshotList.items))
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                             vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
                         }
@@ -124,7 +121,7 @@ fun HomeScreen(
                 items(
                     count = moviesStream.itemCount,
                     key = moviesStream.itemKey { it.id },
-                    contentType = moviesStream.itemContentType { Movie::class.java }
+                    contentType = moviesStream.itemContentType { it::class.java }
                 ) {
                     val item = moviesStream[it]
                     item?.let { movie ->

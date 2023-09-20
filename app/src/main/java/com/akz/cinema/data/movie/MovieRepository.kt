@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.akz.cinema.data.movie.source.local.LocalMovie
 import com.akz.cinema.data.movie.source.local.LocalMovieDao
 import com.akz.cinema.data.movie.source.local.recent.LocalRecentMovieDao
 import com.akz.cinema.data.movie.source.local.recent.toMovies
@@ -42,6 +43,15 @@ class MovieRepository @Inject constructor(
         return Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = false),
             pagingSourceFactory = { NowPlayingPagingSource(movieApi) }
+        ).flow
+    }
+
+    fun getLocalMoviesStream(): Flow<PagingData<LocalMovie>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+            pagingSourceFactory = {
+                localMovieDao.loadMoviesStreamFromLocal()
+            }
         ).flow
     }
 

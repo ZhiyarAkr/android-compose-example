@@ -9,11 +9,13 @@ import androidx.navigation.compose.composable
 const val SearchScreenRoute = "search_screen"
 
 fun NavGraphBuilder.searchScreenNavGraph(
-    onDetailPressed: (Int) -> Unit
+    onDetailPressed: (Int) -> Unit,
+    onBackPressed: () -> Unit
 ) {
     composable(route = SearchScreenRoute) {
         SearchScreen(
-            onDetailPressed = onDetailPressed
+            onDetailPressed = onDetailPressed,
+            onBackPressed = onBackPressed
         )
     }
 }
