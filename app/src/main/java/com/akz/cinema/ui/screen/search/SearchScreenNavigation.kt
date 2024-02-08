@@ -10,12 +10,10 @@ const val SearchScreenRoute = "search_screen"
 
 fun NavGraphBuilder.searchScreenNavGraph(
     onDetailPressed: (Int) -> Unit,
-    onBackPressed: () -> Unit
 ) {
     composable(route = SearchScreenRoute) {
         SearchScreen(
-            onDetailPressed = onDetailPressed,
-            onBackPressed = onBackPressed
+            onDetailPressed = onDetailPressed
         )
     }
 }

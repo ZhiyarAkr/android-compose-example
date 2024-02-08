@@ -105,6 +105,7 @@ fun CinemaTheme(
             window.navigationBarColor = Color.TRANSPARENT
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
+                window.isStatusBarContrastEnforced = false
             }
         }
     }

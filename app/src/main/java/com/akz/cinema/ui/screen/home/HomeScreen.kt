@@ -24,15 +24,18 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -47,7 +50,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import com.akz.cinema.LocalPaddings
-import com.akz.cinema.data.movie.Movie
+import com.akz.cinema.LocalTopAppBarState
 import com.akz.cinema.ui.components.SaveMoviesInteraction
 import com.akz.cinema.ui.components.SearchInteraction
 
@@ -56,7 +59,6 @@ import com.akz.cinema.ui.components.SearchInteraction
 fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel(),
     interactionSource: MutableInteractionSource,
-    scrollBehavior: TopAppBarScrollBehavior,
     onDetailPressed: (Int) -> Unit,
     onSearchIconPressed: () -> Unit,
 ) {
@@ -64,6 +66,13 @@ fun HomeScreen(
     val moviesStream = viewModel.nowPlayingMoviesStream.collectAsLazyPagingItems()
     val lf = LocalLifecycleOwner.current.lifecycle
     val context = LocalContext.current
+    val topAppBarState = LocalTopAppBarState.current
+    var topBarHeightOffset by rememberSaveable {
+        mutableFloatStateOf(0f)
+    }
+    var topBarContentOffset by rememberSaveable {
+        mutableFloatStateOf(0f)
+    }
     val vibrator = remember {
         context.getSystemService(Vibrator::class.java) as Vibrator
     }
@@ -80,12 +89,20 @@ fun HomeScreen(
                     }
 
                     is SearchInteraction -> {
+                        topBarContentOffset = topAppBarState.contentOffset
+                        topBarHeightOffset = topAppBarState.heightOffset
                         onSearchIconPressed()
                     }
                 }
             }
         }
     }
+
+    LaunchedEffect(Unit) {
+        topAppBarState.contentOffset = topBarContentOffset
+        topAppBarState.heightOffset = topBarHeightOffset
+    }
+
     val padding = LocalPaddings.current.calculateTopPadding()
     LaunchedEffect(padding) {
         viewModel.updateTopPadding(max(viewModel.topPadding, padding))
@@ -96,8 +113,7 @@ fun HomeScreen(
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -130,6 +146,8 @@ fun HomeScreen(
                                 .fillMaxWidth(0.9f)
                                 .height(400.dp),
                             onClick = {
+                                topBarContentOffset = topAppBarState.contentOffset
+                                topBarHeightOffset = topAppBarState.heightOffset
                                 onDetailPressed(movie.id)
                             }
                         ) {
@@ -154,7 +172,7 @@ fun HomeScreen(
                                     .padding(horizontal = 8.dp)
                                     .padding(bottom = 16.dp),
                                 horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.SpaceBetween
+                                verticalArrangement = Arrangement.Bottom
                             ) {
                                 Text(
                                     text = movie.title,

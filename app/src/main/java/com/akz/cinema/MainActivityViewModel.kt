@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.akz.cinema.data.connectivity.Connectivity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -17,23 +19,21 @@ class MainActivityViewModel @Inject constructor(
     private val connectivity: Connectivity
 ): ViewModel() {
 
-    private val _showConnectivityStatus = MutableStateFlow(false)
-    val showConnectivityStatus = _showConnectivityStatus.asStateFlow()
-
-    val isConnected = connectivity.isConnected.onEach{
+    val isConnected = connectivity.isConnected.map {
         if (it) {
-            _showConnectivityStatus.update {
-                false
-            }
+            true
         } else {
-            _showConnectivityStatus.update {
-                true
-            }
+            delay(100)
+            false
         }
     }.stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
-        false
+        true
     )
 
+    override fun onCleared() {
+        connectivity.unRegisterNetworkCallback()
+        super.onCleared()
+    }
 }

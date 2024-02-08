@@ -14,15 +14,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.akz.cinema.LocalPaddings
 import com.akz.cinema.R
 import kotlinx.coroutines.launch
 
@@ -69,7 +67,8 @@ fun DetailScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .systemBarsPadding(),
+            .padding(top = LocalPaddings.current.calculateTopPadding())
+            .navigationBarsPadding(),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -175,18 +174,6 @@ fun DetailScreen(
                     contentDescription = "Can be Scrolled"
                 )
             }
-        }
-        IconButton(
-            onClick = onBackPressed,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp),
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = Color.White.copy(alpha = 0.5f),
-                contentColor = Color.Black
-            )
-        ) {
-            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "back")
         }
     }
 }

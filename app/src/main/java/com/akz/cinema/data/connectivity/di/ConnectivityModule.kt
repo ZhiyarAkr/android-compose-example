@@ -23,10 +23,4 @@ object ConnectivityModule {
             ConnectivityManager::class.java
         ) as ConnectivityManager
     }
-
-    @Provides
-    @Singleton
-    fun provideConnectivity(connectivityManager: ConnectivityManager) : Connectivity {
-        return Connectivity(connectivityManager)
-    }
 }
