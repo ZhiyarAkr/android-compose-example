@@ -1,6 +1,7 @@
 package com.akz.cinema.data.movie
 
 import android.content.Context
+import android.icu.util.Calendar
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -12,6 +13,7 @@ import com.akz.cinema.data.movie.source.local.toMovies
 import com.akz.cinema.data.movie.source.remote.MovieApi
 import com.akz.cinema.data.movie.source.remote.NowPlayingPagingSource
 import com.akz.cinema.data.movie.source.remote.toMovies
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -23,7 +25,8 @@ import javax.inject.Inject
 class MovieRepository @Inject constructor(
     private val movieApi: MovieApi,
     private val localMovieDao: LocalMovieDao,
-    private val localRecentMovieDao: LocalRecentMovieDao
+    private val localRecentMovieDao: LocalRecentMovieDao,
+    @ApplicationContext private val context: Context
 ) {
     suspend fun fetchMoviesOfWeek(): List<Movie> {
         var movies: List<Movie> = listOf()
@@ -86,7 +89,57 @@ class MovieRepository @Inject constructor(
         localRecentMovieDao.deleteOneById(id)
     }
 
-    suspend fun saveRecentMovieToLocal(movie: Movie, context: Context, inputStream: ByteArrayInputStream) {
+    suspend fun saveMovieToLocal(
+        movie: Movie,
+        inputStream: ByteArrayInputStream
+    ) {
+        val target = if (context.filesDir.usableSpace >= inputStream.available()) {
+            context.filesDir
+        } else {
+            context.getExternalFilesDir(null)
+        }
+        val imageDir = File(target, "images")
+        if (!imageDir.exists()) {
+            imageDir.mkdir()
+        }
+        var filePath: String? = null
+
+        if (!localMovieDao.checkIfExistsById(movie.id)) {
+            movie.backdropPath?.let {
+                val fileName = Calendar.getInstance().timeInMillis.toString() + it
+                val file = File(imageDir, fileName)
+                file.outputStream().use { oStream ->
+                    inputStream.copyTo(oStream)
+                }
+                filePath = file.absolutePath
+            }
+        } else {
+            val mov = localMovieDao.getOneById(movie.id)
+            filePath = mov.backdropPath
+        }
+
+        localMovieDao.insert(
+                id = movie.id,
+                isAdult = movie.isAdult,
+                backdropPath = filePath,
+                language = movie.language,
+                title = movie.title,
+                overview = movie.overview,
+                releaseDate = movie.releaseDate,
+        )
+    }
+
+    suspend fun deleteMovieFromLocal(movie: Movie) {
+        if (localMovieDao.checkIfExistsById(movie.id)) {
+            movie.backdropPath?.let {
+                val file = File(it)
+                file.delete()
+            }
+            localMovieDao.deleteOneById(movie.id)
+        }
+    }
+
+    suspend fun saveRecentMovieToLocal(movie: Movie, inputStream: ByteArrayInputStream) {
         val target = if (context.filesDir.usableSpace >= inputStream.available()) {
             context.filesDir
         } else {
@@ -112,6 +165,9 @@ class MovieRepository @Inject constructor(
             backdropPath = filePath
         )
     }
+
+    suspend fun getResentMoviesCount(): Long = localRecentMovieDao.getRecentMoviesCount()
+    fun observeRecentMoviesCount(): Flow<Long> = localRecentMovieDao.observeRecentMoviesCount()
 
     suspend fun checkRecentMoviesSizeAndFilterOld() {
         var recentMovies = localRecentMovieDao.loadAll()

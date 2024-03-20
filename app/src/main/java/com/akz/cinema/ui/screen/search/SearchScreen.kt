@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +29,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +44,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.akz.cinema.LocalHideNavBar
 import com.akz.cinema.LocalPaddings
+import com.akz.cinema.ui.components.Skeleton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,12 +57,22 @@ fun SearchScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = LocalPaddings.current.calculateTopPadding())
-            .navigationBarsPadding()
+            .padding(bottom = LocalPaddings.current.calculateBottomPadding())
     ) {
         val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+        val recentCount by viewModel.recentMoviesCount.collectAsStateWithLifecycle()
         val keyboardController = LocalSoftwareKeyboardController.current
+        var hideNavbar by LocalHideNavBar.current
         val context = LocalContext.current
+
+        LaunchedEffect(viewModel.isSearchBarActive) {
+            hideNavbar = viewModel.isSearchBarActive
+        }
+        DisposableEffect(Unit) {
+            onDispose {
+                hideNavbar = false
+            }
+        }
 
         SearchBar(
             modifier = Modifier.align(Alignment.TopCenter),
@@ -113,14 +130,26 @@ fun SearchScreen(
                     )
                 )
             ) {
-                Text(
-                    text = "Recent",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp)
-                )
+                Row(
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 16.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Recent: ",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    recentCount?.let {
+                        Text(
+                            text = "$it found",
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
+                }
             }
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .navigationBarsPadding(),
             ) {
                 items(items = searchResults) { movie ->
                     ListItem(
@@ -141,18 +170,17 @@ fun SearchScreen(
                                 AsyncImage(
                                     model = path,
                                     contentDescription = "Movie Photo",
-                                    contentScale = ContentScale.Fit,
+                                    contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .width(150.dp)
-                                        .height(100.dp)
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .fillMaxHeight()
+                                        .clip(RoundedCornerShape(8.dp))
                                 )
-                            } ?: Box(
+                            } ?: Skeleton(
                                 modifier = Modifier
                                     .width(150.dp)
                                     .height(100.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(color = MaterialTheme.colorScheme.onBackground)
+                                    .clip(RoundedCornerShape(8.dp))
                             )
                         },
                         supportingContent = {

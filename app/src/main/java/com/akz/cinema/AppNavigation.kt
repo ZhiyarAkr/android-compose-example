@@ -1,6 +1,5 @@
 package com.akz.cinema
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,16 +26,19 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.akz.cinema.lib.Screen
 import com.akz.cinema.lib.getScreen
-import com.akz.cinema.ui.components.BackPressInteraction
+import com.akz.cinema.ui.components.AppBottomBar
 import com.akz.cinema.ui.components.CinemaTopAppBar
-import com.akz.cinema.ui.components.ConnectivityStatusBar
 import com.akz.cinema.ui.screen.detail.detailScreenNavGraph
 import com.akz.cinema.ui.screen.detail.navigateToDetailScreen
 import com.akz.cinema.ui.screen.home.HOME_SCREEN_ROUTE
 import com.akz.cinema.ui.screen.home.homeScreenNavGraph
-import com.akz.cinema.ui.screen.search.navigateToSearchScreen
+import com.akz.cinema.ui.screen.saved.savedScreenGraph
 import com.akz.cinema.ui.screen.search.searchScreenNavGraph
-import kotlinx.coroutines.isActive
+
+
+val LocalHideNavBar = compositionLocalOf {
+    mutableStateOf(false)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,10 +46,15 @@ fun AppNavigation(
     viewModel: MainActivityViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val interactionSource = remember { MutableInteractionSource() }
     var screen by remember { mutableStateOf(Screen.Home) }
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
+    val hideNavBar = remember { mutableStateOf(false) }
+    val navBarVisible by remember {
+        derivedStateOf {
+            !hideNavBar.value && screen.hasNavigationBar
+        }
+    }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = topAppBarState,
@@ -61,40 +69,32 @@ fun AppNavigation(
         topAppBarState.contentOffset = 0f
     }
 
-    LaunchedEffect(Unit) {
-        while (isActive) {
-            interactionSource.interactions.collect {
-                when (it) {
-                    is BackPressInteraction -> navController.popBackStack()
-                }
-            }
-        }
-    }
-
-
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         bottomBar = {
-            ConnectivityStatusBar(
-                isConnected = isConnected
+            AppBottomBar(
+                navController = navController,
+                isConnected = isConnected,
+                isNavBarVisible = navBarVisible
             )
         },
         topBar = {
-            if (screen.hasTopBar) {
-                CinemaTopAppBar(
-                    screen = screen,
-                    interactionSource = interactionSource,
-                    scrollBehavior = scrollBehavior
-                )
-            }
+            CinemaTopAppBar(
+                screen = screen,
+                onBackPressed = {
+                    navController.popBackStack()
+                },
+                scrollBehavior = scrollBehavior
+            )
         }
     ) { paddings ->
         CompositionLocalProvider(
             LocalPaddings provides paddings,
-            LocalTopAppBarState provides topAppBarState
+            LocalTopAppBarState provides topAppBarState,
+            LocalHideNavBar provides hideNavBar
         ) {
             NavHost(
                 navController = navController,
@@ -103,11 +103,7 @@ fun AppNavigation(
                 homeScreenNavGraph(
                     onDetailPressed = { movieId ->
                         navController.navigateToDetailScreen(movieId)
-                    },
-                    onSearchIconPressed = {
-                        navController.navigateToSearchScreen()
-                    },
-                    interactionSource = interactionSource
+                    }
                 )
 
                 detailScreenNavGraph(
@@ -118,6 +114,7 @@ fun AppNavigation(
                         navController.navigateToDetailScreen(movieId)
                     }
                 )
+                savedScreenGraph()
             }
         }
     }

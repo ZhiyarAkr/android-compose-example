@@ -11,7 +11,7 @@ interface MovieApi {
     @GET("trending/movie/week?language=en-US")
     suspend fun fetchTrendingMoviesWeek(): Response<TrendingMoviesResponse>
 
-    @GET("trending/movie/week?language=en-US")
+    @GET("trending/movie/day?language=en-US")
     suspend fun fetchTrendingMoviesDay(): Response<TrendingMoviesResponse>
 
     @GET("search/movie?")

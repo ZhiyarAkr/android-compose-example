@@ -17,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.onEach
@@ -40,6 +41,12 @@ class SearchScreenViewModel @Inject constructor(
         viewModelScope,
         SharingStarted.Eagerly,
         emptyList()
+    )
+
+    val recentMoviesCount: StateFlow<Long?> = movieRepository.observeRecentMoviesCount().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        null
     )
 
     var isSearchBarActive by mutableStateOf(false)
@@ -119,7 +126,6 @@ class SearchScreenViewModel @Inject constructor(
                         inputStream.use { input ->
                             movieRepository.saveRecentMovieToLocal(
                                 event.movie,
-                                event.context,
                                 input
                             )
                         }

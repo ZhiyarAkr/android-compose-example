@@ -1,0 +1,147 @@
+package com.akz.cinema.ui.screen.saved
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.akz.cinema.LocalPaddings
+import com.akz.cinema.data.movie.Movie
+
+@Composable
+fun SavedScreen(
+    viewModel: SavedScreenViewModel = hiltViewModel()
+) {
+
+    SavedScreenContent()
+}
+
+@Composable
+fun SavedScreenContent(
+
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = LocalPaddings.current.calculateBottomPadding())
+            .statusBarsPadding()
+    ) {
+
+    }
+}
+
+@Composable
+private fun SavedScreenLazyColumn(
+    modifier: Modifier = Modifier,
+    movies: List<Movie>
+) {
+
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(vertical = 32.dp)
+    ) {
+        items(
+            items = movies,
+            key = { it.id }
+        ) {
+            MovieItem(
+                movie = it,
+                onClick = {
+
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun MovieItem(
+    modifier: Modifier = Modifier,
+    movie: Movie,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth(0.9f)
+            .height(400.dp),
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    ) {
+        movie.backdropPath?.let { backDrop ->
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500/$backDrop",
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+        }
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp)
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 16.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            Text(
+                text = movie.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            if (movie.isAdult) {
+                Box(
+                    modifier = Modifier.padding(vertical = 8.dp)
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                color = Color.Red.copy(alpha = 0.6f)
+                            )
+                            .padding(8.dp),
+                        text = "Adult"
+                    )
+                }
+            }
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = movie.overview,
+                style = MaterialTheme.typography.bodySmall,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}

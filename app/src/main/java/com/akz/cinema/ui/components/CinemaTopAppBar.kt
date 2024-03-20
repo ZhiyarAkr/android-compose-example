@@ -1,10 +1,16 @@
 package com.akz.cinema.ui.components
 
-import androidx.compose.foundation.interaction.Interaction
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -13,11 +19,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
-import com.akz.cinema.R
+import androidx.compose.ui.graphics.graphicsLayer
 import com.akz.cinema.lib.Screen
 import kotlinx.coroutines.launch
 
@@ -26,72 +31,76 @@ import kotlinx.coroutines.launch
 fun CinemaTopAppBar(
     modifier: Modifier = Modifier,
     screen: Screen,
-    interactionSource: MutableInteractionSource,
+    onBackPressed: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
-    val scope = rememberCoroutineScope()
-    TopAppBar(
+    AnimatedVisibility(
         modifier = modifier,
-        scrollBehavior = scrollBehavior,
-        navigationIcon = {
-            if (screen.hasBackBtn) {
-                IconButton(onClick = { scope.launch { interactionSource.emit(BackPressInteraction()) } }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = "Navigate back"
+        visible = screen.hasTopBar,
+        enter = fadeIn() + slideInVertically(initialOffsetY = { -it }),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { -it })
+    ) {
+        val anim = remember {
+            Animatable(-70f, Float.VectorConverter)
+        }
+        val anim2 = remember {
+            Animatable(0f, Float.VectorConverter)
+        }
+        LaunchedEffect(Unit) {
+            launch {
+                anim.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = 400,
+                        delayMillis = 200,
+                        easing = FastOutSlowInEasing
                     )
-                }
-            }
-        },
-        title = {
-            screen.topBarTitle?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
-        },
-        actions = {
-            when(screen) {
-                Screen.Home -> HomeTopBarContents(interactionSource = interactionSource)
-                Screen.Detail -> {}
-                Screen.Search -> {}
+            launch {
+                anim2.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = 400,
+                        delayMillis = 200
+                    )
+                )
             }
         }
-    )
-}
-
-class SaveMoviesInteraction : Interaction
-class SearchInteraction : Interaction
-class BackPressInteraction : Interaction
-
-@Composable
-private fun HomeTopBarContents(
-    interactionSource: MutableInteractionSource
-) {
-    val scope = rememberCoroutineScope()
-    IconButton(
-        onClick = {
-            scope.launch {
-                interactionSource.emit(SaveMoviesInteraction())
+        TopAppBar(
+            scrollBehavior = scrollBehavior,
+            navigationIcon = {
+                if (screen.hasBackBtn) {
+                    IconButton(
+                        modifier = Modifier.graphicsLayer {
+                            rotationZ = anim.value
+                            alpha = anim2.value
+                        },
+                        onClick = onBackPressed
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                }
+            },
+            title = {
+                screen.topBarTitle?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            },
+            actions = {
+                when (screen) {
+                    Screen.Home -> {}
+                    Screen.Detail -> {}
+                    Screen.Search -> {}
+                    Screen.Saved -> {}
+                }
             }
-        }
-    ) {
-        Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_bookmark_border_24),
-            contentDescription = "bookmark"
-        )
-    }
-    IconButton(
-        onClick = {
-            scope.launch {
-                interactionSource.emit(SearchInteraction())
-            }
-        }
-    ) {
-        Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = "search"
         )
     }
 }

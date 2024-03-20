@@ -10,7 +10,7 @@ android {
     namespace = "com.akz.cinema"
     compileSdk = 34
 
-    val accessToken: String = gradleLocalProperties(rootDir).getProperty("TMDB_AUTH_TOKEN") as String
+    val accessToken: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_AUTH_TOKEN") as String
 
     defaultConfig {
         applicationId = "com.akz.cinema"
@@ -80,9 +80,9 @@ ksp {
 
 dependencies {
 
-    val navVersion = "2.7.6"
+    val navVersion = "2.7.7"
     val lifecycleVersion = "2.7.0"
-    val material3Version = "1.2.0-rc01"
+    val material3Version = "1.2.1"
     val roomVersion = "2.6.1"
     val pagingVersion = "3.2.1"
 
@@ -90,14 +90,14 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.22"))
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2024.01.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.02.02"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.01.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.02"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -125,9 +125,9 @@ dependencies {
     // compose coil
     implementation("io.coil-kt:coil-compose:2.5.0")
     //hilt
-    implementation("com.google.dagger:hilt-android:2.50")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-    ksp("com.google.dagger:hilt-compiler:2.50")
+    implementation("com.google.dagger:hilt-android:2.51")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    ksp("com.google.dagger:hilt-compiler:2.51")
     //moshi
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     implementation("com.squareup.moshi:moshi:1.15.1")
@@ -153,4 +153,7 @@ dependencies {
 
     //truth
     testImplementation("com.google.truth:truth:1.4.0")
+
+    //palette
+    implementation("androidx.palette:palette-ktx:1.0.0")
 }

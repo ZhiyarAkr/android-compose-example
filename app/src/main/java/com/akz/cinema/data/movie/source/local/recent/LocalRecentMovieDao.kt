@@ -40,4 +40,9 @@ interface LocalRecentMovieDao {
     @Query("DELETE FROM $RECENT_MOVIES_TABLE_NAME")
     suspend fun deleteAll()
 
+    @Query("SELECT COUNT(*) FROM $RECENT_MOVIES_TABLE_NAME")
+    suspend fun getRecentMoviesCount(): Long
+
+    @Query("SELECT COUNT(*) FROM $RECENT_MOVIES_TABLE_NAME")
+    fun observeRecentMoviesCount(): Flow<Long>
 }

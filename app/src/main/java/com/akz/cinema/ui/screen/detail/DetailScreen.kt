@@ -1,6 +1,7 @@
 package com.akz.cinema.ui.screen.detail
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -26,8 +27,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,11 +54,20 @@ fun DetailScreen(
     val movie by viewModel.movieDetail.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
+    val paddingValues = LocalPaddings.current
 
     val showScrollIcon by remember {
         derivedStateOf {
             scrollState.value == 0 && scrollState.canScrollForward
         }
+    }
+
+    var topPadding by remember {
+        mutableStateOf(0.dp)
+    }
+
+    LaunchedEffect(paddingValues) {
+        topPadding = maxOf(topPadding, paddingValues.calculateTopPadding())
     }
 
     LaunchedEffect(Unit) {
@@ -67,7 +79,7 @@ fun DetailScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = LocalPaddings.current.calculateTopPadding())
+            .padding(top = topPadding)
             .navigationBarsPadding(),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -80,9 +92,9 @@ fun DetailScreen(
         ) {
             movie?.let {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500/${it.backdropPath}",
+                    model = "https://image.tmdb.org/t/p/w780/${it.backdropPath}",
                     contentDescription = null,
-                    contentScale = ContentScale.Fit,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),
@@ -161,7 +173,10 @@ fun DetailScreen(
                     scope.launch {
                         scrollState.animateScrollTo(
                             scrollState.maxValue,
-                            animationSpec = tween(durationMillis = 100)
+                            animationSpec = tween(
+                                durationMillis = 100,
+                                easing = FastOutSlowInEasing
+                            )
                         )
                     }
                 }

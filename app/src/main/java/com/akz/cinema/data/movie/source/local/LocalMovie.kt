@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.akz.cinema.data.movie.Movie
 
-const val MOVIE_TABLE_NAME = "movie_table"
+const val MOVIE_TABLE_NAME = "movies"
 
 @Entity(tableName = MOVIE_TABLE_NAME)
 data class LocalMovie(
