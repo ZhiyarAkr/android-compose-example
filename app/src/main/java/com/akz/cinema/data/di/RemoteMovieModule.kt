@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -20,7 +21,7 @@ object RemoteMovieModule {
 
     @Provides
     @Singleton
-    fun provideOkhttpClient(): OkHttpClient {
+    fun provideOkhttpClient(): Call.Factory {
         return OkHttpClient.Builder()
             .addInterceptor(TMDBHeaderInterceptor())
             .readTimeout(15, TimeUnit.SECONDS)
@@ -30,11 +31,13 @@ object RemoteMovieModule {
 
     @Provides
     @Singleton
-    fun provideRetrofitInstance(client: OkHttpClient): Retrofit {
+    fun provideRetrofitInstance(callFactory: dagger.Lazy<Call.Factory>): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://api.themoviedb.org/3/")
             .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
+            .callFactory {
+                callFactory.get().newCall(it)
+            }
             .build()
     }
 
