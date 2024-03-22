@@ -1,5 +1,9 @@
 package com.akz.cinema.ui.screen.detail
 
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.akz.cinema.data.detail.MovieDetail
@@ -20,12 +24,21 @@ class DetailScreenViewModel @Inject constructor(
     private val _movieDetail: MutableStateFlow<MovieDetail?> = MutableStateFlow(null)
     val movieDetail = _movieDetail.asStateFlow()
 
+    var saveToLocal by mutableStateOf(false)
+        private set
+
     fun onEvent(detailEvent: DetailEvent) {
         when(detailEvent) {
             DetailEvent.DeleteAll -> deleteAllLocals()
-            is DetailEvent.DeleteDetail -> deleteDetailFromLocal(detailEvent.movieDetail)
+            is DetailEvent.DeleteDetail -> {
+                saveToLocal = false
+            }
             is DetailEvent.GetDetail -> getMovieDetail(detailEvent.movieId)
-            is DetailEvent.SaveDetail -> saveDetailToLocal(detailEvent.movieDetail)
+            is DetailEvent.SaveDetail -> {
+                saveToLocal = true
+            }
+
+            DetailEvent.EnqueueLocalStorageWorkers -> enqueueLocalStorageWorkers()
         }
     }
 
@@ -36,19 +49,7 @@ class DetailScreenViewModel @Inject constructor(
                 _movieDetail.update {
                     md
                 }
-            } catch (e: Throwable) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun saveDetailToLocal(movieDetail: MovieDetail) {
-        viewModelScope.launch {
-            try {
-                val saved = movieDetailRepository.saveToLocal(movieDetail)
-                _movieDetail.update {
-                    saved
-                }
+                saveToLocal = md?.isSavedInLocal ?: false
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
@@ -65,17 +66,13 @@ class DetailScreenViewModel @Inject constructor(
         }
     }
 
-    private fun deleteDetailFromLocal(movieDetail: MovieDetail) {
-        viewModelScope.launch {
-            try {
-                val deleted = movieDetailRepository.deleteOne(movieDetail)
-                _movieDetail.update {
-                    deleted
-                }
-            } catch (e: Throwable) {
-                e.printStackTrace()
+    private fun enqueueLocalStorageWorkers() {
+        movieDetail.value?.let {
+            if (!it.isSavedInLocal && saveToLocal) {
+                movieDetailRepository.saveToLocal(it)
+            } else if (it.isSavedInLocal && !saveToLocal) {
+                movieDetailRepository.deleteOne(it)
             }
         }
     }
-
 }

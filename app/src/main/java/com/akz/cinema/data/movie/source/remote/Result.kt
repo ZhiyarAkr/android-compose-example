@@ -20,7 +20,7 @@ data class Result(
     val vote_count: Int
 )
 
-fun Result.toMovie() = Movie(
+fun Result.toExternal() = Movie(
     isAdult = adult,
     backdropPath = backdrop_path,
     id = id,
@@ -30,4 +30,4 @@ fun Result.toMovie() = Movie(
     releaseDate = release_date
 )
 
-fun List<Result>.toMovies() = map(Result::toMovie)
+fun List<Result>.toExternal() = map(Result::toExternal)

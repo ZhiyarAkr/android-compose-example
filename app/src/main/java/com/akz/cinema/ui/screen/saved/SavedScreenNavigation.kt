@@ -14,7 +14,7 @@ import com.akz.cinema.util.slideOutOrStandardPopExit
 
 const val SavedScreenRoute = "saved_screen"
 fun NavGraphBuilder.savedScreenGraph(
-
+    onDetail: (Int) -> Unit
 ) {
     composable(
         route = SavedScreenRoute,
@@ -24,7 +24,7 @@ fun NavGraphBuilder.savedScreenGraph(
         popEnterTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideInOrStandardPopEnter,
         popExitTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideOutOrStandardPopExit,
     ) {
-        SavedScreen()
+        SavedScreen(onDetail = onDetail)
     }
 }
 

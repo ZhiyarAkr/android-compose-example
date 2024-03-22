@@ -4,8 +4,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -140,7 +143,6 @@ fun HomeScreen(
     Box(
         modifier = mainScreenModifier
             .fillMaxSize()
-            .padding(bottom = viewModel.bottomPadding)
             .statusBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
@@ -202,6 +204,12 @@ fun HomeScreen(
                     onClick = onClick
                 )
             }
+            Spacer(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .fillMaxWidth()
+                    .height(viewModel.bottomPadding)
+            )
         }
     }
 }

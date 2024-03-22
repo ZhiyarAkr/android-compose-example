@@ -12,7 +12,7 @@ interface LocalMovieDetailDao {
     fun observeAll(): Flow<List<LocalMovieDetail>>
 
     @Upsert
-    suspend fun upsert(localMovieDetail: LocalMovieDetail)
+    suspend fun upsert(localMovieDetail: LocalMovieDetail): Long
 
     @Query("SELECT * FROM detail_table WHERE id is :id LIMIT 1")
     suspend fun loadOneById(id: Int): LocalMovieDetail?

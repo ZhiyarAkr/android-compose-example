@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.akz.cinema.data.movie.Movie
+import com.akz.cinema.util.RemoteImageSize
+import com.akz.cinema.util.getUriForRemoteImage
 
 @Composable
 fun HomePageHeroCard(
@@ -54,7 +56,7 @@ fun HomePageHeroCard(
                 modifier = Modifier.fillMaxSize()
             ) {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w1280/${it.backdropPath}",
+                    model = getUriForRemoteImage(it.backdropPath, RemoteImageSize.ImageSizeW1280),
                     contentDescription = "Hero movie Image",
                     modifier = Modifier
                         .fillMaxSize()

@@ -114,7 +114,11 @@ fun AppNavigation(
                         navController.navigateToDetailScreen(movieId)
                     }
                 )
-                savedScreenGraph()
+                savedScreenGraph(
+                    onDetail = {
+                        navController.navigateToDetailScreen(it)
+                    }
+                )
             }
         }
     }

@@ -36,13 +36,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.R
+import com.akz.cinema.util.RemoteImageSize
+import com.akz.cinema.util.getUriForLocalDetailImage
+import com.akz.cinema.util.getUriForRemoteImage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,6 +61,7 @@ fun DetailScreen(
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val paddingValues = LocalPaddings.current
+    val context = LocalContext.current
 
     val showScrollIcon by remember {
         derivedStateOf {
@@ -76,6 +83,10 @@ fun DetailScreen(
         }
     }
 
+    LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
+        viewModel.onEvent(DetailEvent.EnqueueLocalStorageWorkers)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -92,7 +103,10 @@ fun DetailScreen(
         ) {
             movie?.let {
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w780/${it.backdropPath}",
+                    model = if (it.isSavedInLocal) getUriForLocalDetailImage(
+                        it.backdropPath,
+                        context
+                    ) else getUriForRemoteImage(it.backdropPath, RemoteImageSize.ImageSizeW780),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -116,7 +130,7 @@ fun DetailScreen(
                     )
                     IconButton(
                         onClick = {
-                            if (it.isSavedInLocal) {
+                            if (viewModel.saveToLocal) {
                                 viewModel.onEvent(DetailEvent.DeleteDetail(it))
                             } else {
                                 viewModel.onEvent(DetailEvent.SaveDetail(it))
@@ -124,7 +138,7 @@ fun DetailScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = if (it.isSavedInLocal) ImageVector.vectorResource(R.drawable.baseline_bookmark_24) else ImageVector.vectorResource(
+                            imageVector = if (viewModel.saveToLocal) ImageVector.vectorResource(R.drawable.baseline_bookmark_24) else ImageVector.vectorResource(
                                 R.drawable.baseline_bookmark_border_24
                             ),
                             contentDescription = "Bookmark",

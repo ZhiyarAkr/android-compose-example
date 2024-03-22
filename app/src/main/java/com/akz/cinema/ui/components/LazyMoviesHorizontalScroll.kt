@@ -31,6 +31,7 @@ import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import com.akz.cinema.data.movie.Movie
 import com.akz.cinema.ui.theme.CinemaTheme
+import com.akz.cinema.util.getUriForRemoteImage
 
 private val RowHeight = 200.dp
 private val ItemWidth = 120.dp
@@ -114,7 +115,7 @@ private fun MovieItem(
             .width(ItemWidth),
     ) {
         AsyncImage(
-            model = "https://image.tmdb.org/t/p/w500/${movie.backdropPath}",
+            model = getUriForRemoteImage(movie.backdropPath),
             contentDescription = "Movie image",
             modifier = Modifier
                 .fillMaxWidth()

@@ -1,7 +1,6 @@
 package com.akz.cinema.ui.screen.home
 
 import android.graphics.drawable.Drawable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,7 +12,7 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import com.akz.cinema.data.movie.Movie
 import com.akz.cinema.data.movie.MovieRepository
-import com.akz.cinema.data.movie.source.local.toMovie
+import com.akz.cinema.data.movie.source.local.toExternal
 import com.akz.cinema.util.PaletteManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +42,7 @@ class HomeScreenViewModel @Inject constructor(
         .map {
             withContext(Dispatchers.Default) {
                 it.map { movie ->
-                    movie.toMovie()
+                    movie.toExternal()
                 }
             }
         }

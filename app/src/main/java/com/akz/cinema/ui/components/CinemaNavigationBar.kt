@@ -15,12 +15,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.akz.cinema.lib.NavigationItem
-import com.akz.cinema.ui.screen.search.isSearchScreenCurrentDestination
 import kotlinx.coroutines.launch
+
+private const val delay = 150
+private const val duration = 250
+private const val perItemDelay = 50
 
 @Composable
 fun CinemaNavigationBar(
@@ -33,10 +38,16 @@ fun CinemaNavigationBar(
     }
     val backStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(backStackEntry) {
-        selected = if (backStackEntry?.destination?.isSearchScreenCurrentDestination() == true) {
-            1
-        } else {
-            0
+        navItems.forEachIndexed { index, item ->
+            backStackEntry?.let {
+                with(item) {
+                    if (it.destination.isCurrentDestination()) {
+                        if (selected != index) {
+                            selected = index
+                        }
+                    }
+                }
+            }
         }
     }
     NavigationBar(
@@ -54,8 +65,8 @@ fun CinemaNavigationBar(
                     anim.animateTo(
                         0,
                         animationSpec = tween(
-                            300,
-                            delayMillis = 200 + (index * 100)
+                            duration,
+                            delayMillis = delay + (index * perItemDelay)
                         )
                     )
                 }
@@ -63,8 +74,8 @@ fun CinemaNavigationBar(
                     anim2.animateTo(
                         1f,
                         animationSpec = tween(
-                            300,
-                            delayMillis = 200 + (index * 100)
+                            duration,
+                            delayMillis = delay + (index * perItemDelay)
                         )
                     )
                 }
@@ -88,8 +99,12 @@ fun CinemaNavigationBar(
                     }
                 },
                 icon = {
+                    val icon =
+                        if (selected == index) ImageVector.vectorResource(id = item.selectedIcon) else ImageVector.vectorResource(
+                            item.unSelectedIcon
+                        )
                     Icon(
-                        imageVector = if (selected == index) item.selectedImageVector else item.unSelectedImageVector,
+                        imageVector = icon,
                         contentDescription = item.title
                     )
                 }

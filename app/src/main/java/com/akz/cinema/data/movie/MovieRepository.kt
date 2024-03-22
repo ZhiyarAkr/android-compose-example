@@ -8,11 +8,11 @@ import androidx.paging.PagingData
 import com.akz.cinema.data.movie.source.local.LocalMovie
 import com.akz.cinema.data.movie.source.local.LocalMovieDao
 import com.akz.cinema.data.movie.source.local.recent.LocalRecentMovieDao
-import com.akz.cinema.data.movie.source.local.recent.toMovies
-import com.akz.cinema.data.movie.source.local.toMovies
+import com.akz.cinema.data.movie.source.local.recent.toExternal
+import com.akz.cinema.data.movie.source.local.toExternal
 import com.akz.cinema.data.movie.source.remote.MovieApi
 import com.akz.cinema.data.movie.source.remote.NowPlayingPagingSource
-import com.akz.cinema.data.movie.source.remote.toMovies
+import com.akz.cinema.data.movie.source.remote.toExternal
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +35,7 @@ class MovieRepository @Inject constructor(
             response.body()?.let {
                 val results = it.results
                 movies = withContext(Dispatchers.Default) {
-                    results.toMovies()
+                    results.toExternal()
                 }
             }
         }
@@ -68,7 +68,7 @@ class MovieRepository @Inject constructor(
     fun observeLocalStoredMovies(): Flow<List<Movie>> {
         return localMovieDao.observeAll().map {
             withContext(Dispatchers.Default) {
-                it.toMovies()
+                it.toExternal()
             }
         }
     }
@@ -76,7 +76,7 @@ class MovieRepository @Inject constructor(
     fun observeLocalStoredRecentMovies(): Flow<List<Movie>> {
         return localRecentMovieDao.observeAll().map {
             withContext(Dispatchers.Default) {
-                it.toMovies()
+                it.toExternal()
             }
         }
     }
@@ -196,7 +196,7 @@ class MovieRepository @Inject constructor(
             response.body()?.let {
                 val results = it.results
                 movies = withContext(Dispatchers.Default) {
-                    results.toMovies()
+                    results.toExternal()
                 }
             }
         }
@@ -210,7 +210,7 @@ class MovieRepository @Inject constructor(
             response.body()?.let {
                 val results = it.results
                 movies = withContext(Dispatchers.Default) {
-                    results.toMovies()
+                    results.toExternal()
                 }
             }
         }

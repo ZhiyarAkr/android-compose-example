@@ -20,7 +20,7 @@ data class LocalMovieDetail(
     @ColumnInfo(defaultValue = "CURRENT_TIMESTAMP") val createdAt: String
 )
 
-fun LocalMovieDetail.toMovieDetail() = MovieDetail(
+fun LocalMovieDetail.toExternal() = MovieDetail(
     id = id,
     isAdult = isAdult,
     backdropPath = backdropPath,
@@ -38,4 +38,4 @@ fun LocalMovieDetail.toMovieDetail() = MovieDetail(
     isSavedInLocal = true
 )
 
-fun List<LocalMovieDetail>.toMovieDetails(): List<MovieDetail> = map(LocalMovieDetail::toMovieDetail)
+fun List<LocalMovieDetail>.toExternal(): List<MovieDetail> = map(LocalMovieDetail::toExternal)

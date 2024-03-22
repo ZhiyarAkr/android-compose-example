@@ -19,49 +19,55 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.akz.cinema.LocalPaddings
-import com.akz.cinema.data.movie.Movie
+import com.akz.cinema.data.detail.MovieDetail
+import com.akz.cinema.util.getUriForLocalDetailImage
 
 @Composable
 fun SavedScreen(
-    viewModel: SavedScreenViewModel = hiltViewModel()
+    viewModel: SavedScreenViewModel = hiltViewModel(),
+    onDetail: (Int) -> Unit
 ) {
-
-    SavedScreenContent()
+    val movieDetails by viewModel.localMovieDetails.collectAsStateWithLifecycle()
+    SavedScreenContent(movieDetails, onDetail)
 }
 
 @Composable
 fun SavedScreenContent(
-
+    movies: List<MovieDetail>,
+    onDetail: (Int) -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = LocalPaddings.current.calculateBottomPadding())
             .statusBarsPadding()
     ) {
-
+        SavedScreenLazyColumn(movies = movies, onDetail = onDetail)
     }
 }
 
 @Composable
 private fun SavedScreenLazyColumn(
     modifier: Modifier = Modifier,
-    movies: List<Movie>
+    movies: List<MovieDetail>,
+    onDetail: (Int) -> Unit
 ) {
-
     LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(vertical = 32.dp)
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(top = 32.dp, bottom = 100.dp),
     ) {
         items(
             items = movies,
@@ -69,9 +75,7 @@ private fun SavedScreenLazyColumn(
         ) {
             MovieItem(
                 movie = it,
-                onClick = {
-
-                }
+                onClick = onDetail
             )
         }
     }
@@ -80,29 +84,26 @@ private fun SavedScreenLazyColumn(
 @Composable
 private fun MovieItem(
     modifier: Modifier = Modifier,
-    movie: Movie,
-    onClick: () -> Unit
+    movie: MovieDetail,
+    onClick: (Int) -> Unit
 ) {
+    val context = LocalContext.current
     Card(
         modifier = modifier
             .fillMaxWidth(0.9f)
             .height(400.dp),
-        onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        )
+        onClick = {
+            onClick(movie.id)
+        },
     ) {
-        movie.backdropPath?.let { backDrop ->
-            AsyncImage(
-                model = "https://image.tmdb.org/t/p/w500/$backDrop",
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            )
-        }
+        AsyncImage(
+            model = getUriForLocalDetailImage(backdrop = movie.backdropPath, context = context),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()

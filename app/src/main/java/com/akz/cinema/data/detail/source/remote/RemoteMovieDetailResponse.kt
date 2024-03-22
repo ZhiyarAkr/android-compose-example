@@ -30,7 +30,7 @@ data class RemoteMovieDetailResponse(
     val vote_count: Int
 )
 
-fun RemoteMovieDetailResponse.toMovieDetail() = MovieDetail(
+fun RemoteMovieDetailResponse.toExternal() = MovieDetail(
     id = id,
     isAdult = adult,
     backdropPath = backdrop_path,

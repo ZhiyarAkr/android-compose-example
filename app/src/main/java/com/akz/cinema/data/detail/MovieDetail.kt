@@ -24,7 +24,7 @@ data class MovieDetail(
     val isSavedInLocal: Boolean = false
 )
 
-fun MovieDetail.toLocalMovieDetail() = LocalMovieDetail(
+fun MovieDetail.toLocal() = LocalMovieDetail(
     id = id,
     isAdult = isAdult,
     backdropPath = backdropPath,
@@ -38,4 +38,4 @@ fun MovieDetail.toLocalMovieDetail() = LocalMovieDetail(
     createdAt = ""
 )
 
-fun List<MovieDetail>.toLocalMovieDetails(): List<LocalMovieDetail> = map(MovieDetail::toLocalMovieDetail)
+fun List<MovieDetail>.toLocal(): List<LocalMovieDetail> = map(MovieDetail::toLocal)
