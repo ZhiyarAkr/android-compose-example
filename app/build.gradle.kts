@@ -35,9 +35,10 @@ android {
             buildConfigField("String", "TMDB_AUTH_TOKEN", "\"$accessToken\"")
         }
         release {
+            val AT: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_AUTH_TOKEN") as String
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            buildConfigField("string", "TMDB_AUTH_TOKEN", "\"$accessToken\"")
+            buildConfigField("string", "TMDB_AUTH_TOKEN", "\"$AT\"")
         }
     }
     compileOptions {
@@ -87,7 +88,7 @@ dependencies {
     val pagingVersion = "3.2.1"
 
     implementation("androidx.core:core-ktx:1.12.0")
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.22"))
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.23"))
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation(platform("androidx.compose:compose-bom:2024.02.02"))
@@ -123,7 +124,7 @@ dependencies {
     // compose navigation
     implementation("androidx.navigation:navigation-compose:$navVersion")
     // compose coil
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
     //hilt
     implementation("com.google.dagger:hilt-android:2.51")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
@@ -133,12 +134,12 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.15.1")
     ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
     //retrofit and okhttp3
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.10.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.10.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.10.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
     //room
     implementation("androidx.room:room-runtime:$roomVersion")
@@ -152,7 +153,7 @@ dependencies {
     implementation("androidx.paging:paging-compose:$pagingVersion")
 
     //truth
-    testImplementation("com.google.truth:truth:1.4.0")
+    testImplementation("com.google.truth:truth:1.4.2")
 
     //palette
     implementation("androidx.palette:palette-ktx:1.0.0")

@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -51,9 +54,18 @@ fun SavedScreenContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
+            .statusBarsPadding(),
+        contentAlignment = Alignment.TopCenter
     ) {
-        SavedScreenLazyColumn(movies = movies, onDetail = onDetail)
+        if (movies.isNotEmpty()) {
+            SavedScreenLazyColumn(movies = movies, onDetail = onDetail)
+        } else {
+            Text(
+                text = "No Movies Saved",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 64.dp)
+            )
+        }
     }
 }
 
@@ -64,10 +76,13 @@ private fun SavedScreenLazyColumn(
     onDetail: (Int) -> Unit
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 32.dp, bottom = 100.dp),
+        contentPadding = PaddingValues(
+            top = 32.dp,
+            bottom = 100.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        ),
     ) {
         items(
             items = movies,
