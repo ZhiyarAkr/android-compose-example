@@ -19,6 +19,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("string", "TMDB_AUTH_TOKEN", "\"$accessToken\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -35,10 +37,9 @@ android {
             buildConfigField("String", "TMDB_AUTH_TOKEN", "\"$accessToken\"")
         }
         release {
-            val AT: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_AUTH_TOKEN") as String
+            buildConfigField("String", "TMDB_AUTH_TOKEN", "\"$accessToken\"")
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            buildConfigField("string", "TMDB_AUTH_TOKEN", "\"$AT\"")
         }
     }
     compileOptions {
