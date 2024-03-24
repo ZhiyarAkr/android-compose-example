@@ -1,5 +1,7 @@
 package com.akz.cinema.ui.screen.home
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,8 +43,8 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.LocalTopAppBarState
-import com.akz.cinema.ui.components.HomePageHeroCard
 import com.akz.cinema.ui.components.LazyMoviesHorizontalScroll
+import com.akz.cinema.ui.screen.home.carousel.HeroCarousel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,6 +101,14 @@ fun HomeScreen(
         }
     }
 
+    val paletteColorAnimated by animateColorAsState(
+        targetValue = paletteOutput ?: Color.Transparent,
+        label = "palette_color_animation",
+        animationSpec = tween(
+            durationMillis = 500
+        )
+    )
+
 
     val mainScreenModifier = if (isSystemInDarkTheme()) {
         Modifier
@@ -106,8 +116,7 @@ fun HomeScreen(
                 drawRect(
                     brush = Brush.verticalGradient(
                         colorStops = arrayOf(
-                            0f to (paletteOutput?.copy(alpha = secondBgColorOpacity)
-                                ?: Color.Transparent),
+                            0f to paletteColorAnimated.copy(alpha = secondBgColorOpacity),
                             0.8f to Color.Transparent
                         )
                     )
@@ -152,31 +161,24 @@ fun HomeScreen(
                 .verticalScroll(state = scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HomePageHeroCard(
-                movie = moviesOfDay.firstOrNull(),
-                scale = heroScale,
-                onClick = {
-                    onDetailPressed(it)
-                }
+//            HomePageHeroCard(
+//                movie = moviesOfDay.firstOrNull(),
+//                scale = heroScale,
+//                onClick = {
+//                    onDetailPressed(it)
+//                }
+//            )
+            HeroCarousel(
+                modifier = Modifier.padding(top = 32.dp),
+                movies = moviesOfDay,
+                onClick = onDetailPressed,
+                onPositionChange = viewModel::makePaletteFromMovieIndex
             )
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Top movies of the day",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-                LazyMoviesHorizontalScroll(
-                    modifier = Modifier.fillMaxWidth(),
-                    movies = moviesOfDay,
-                    onClick = onClick
-                )
-            }
 
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(

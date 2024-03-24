@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,6 +48,7 @@ import coil.compose.AsyncImage
 import com.akz.cinema.LocalHideNavBar
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.ui.components.Skeleton
+import com.akz.cinema.ui.screen.home.carousel.HeroCarousel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +77,6 @@ fun SearchScreen(
         }
 
         SearchBar(
-            modifier = Modifier.align(Alignment.TopCenter),
             query = viewModel.searchQuery,
             onQueryChange = {
                 viewModel.updateSearchQuery(it)
@@ -148,7 +149,8 @@ fun SearchScreen(
                 }
             }
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .navigationBarsPadding(),
             ) {
                 items(items = searchResults) { movie ->
@@ -193,5 +195,6 @@ fun SearchScreen(
                 }
             }
         }
+
     }
 }

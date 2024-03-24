@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Cinema</string>
+    <string name="carousel_image_description">Movie Image</string>
 </resources>

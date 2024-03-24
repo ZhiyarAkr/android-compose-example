@@ -2,6 +2,7 @@ package com.akz.cinema.ui.screen.search
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -37,6 +38,22 @@ class SearchScreenViewModel @Inject constructor(
     private val _searchResults = MutableStateFlow<List<Movie>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
 
+    private val _dayMovies = MutableStateFlow<List<Movie>>(emptyList())
+    val dayMovies = _dayMovies.asStateFlow()
+
+    init {
+        try {
+            viewModelScope.launch {
+                val res = movieRepository.fetchMoviesOfDay()
+                _dayMovies.update {
+                    res
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private val recentSearchResults = movieRepository.observeLocalStoredRecentMovies().stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
@@ -48,6 +65,7 @@ class SearchScreenViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5000),
         null
     )
+
 
     var isSearchBarActive by mutableStateOf(false)
         private set

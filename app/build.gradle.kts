@@ -12,14 +12,13 @@ android {
 
     val accessToken: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_AUTH_TOKEN") as String
 
+
     defaultConfig {
         applicationId = "com.akz.cinema"
         minSdk = 28
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-
-        buildConfigField("string", "TMDB_AUTH_TOKEN", "\"$accessToken\"")
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -92,14 +91,14 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.23"))
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2024.02.02"))
+    implementation(platform("androidx.compose:compose-bom:2024.03.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.02"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -126,6 +125,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$navVersion")
     // compose coil
     implementation("io.coil-kt:coil-compose:2.6.0")
+    //views coil
+    implementation("io.coil-kt:coil:2.6.0")
     //hilt
     implementation("com.google.dagger:hilt-android:2.51")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
@@ -162,4 +163,7 @@ dependencies {
     //work
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.hilt:hilt-work:1.2.0")
+
+    //views material
+    implementation("com.google.android.material:material:1.11.0")
 }

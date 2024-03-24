@@ -13,6 +13,4 @@ import javax.inject.Singleton
 @InstallIn(ViewModelComponent::class)
 object UtilModule {
 
-    @Provides
-    fun providePaletteManager() = PaletteManager()
 }

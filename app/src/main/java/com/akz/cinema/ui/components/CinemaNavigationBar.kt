@@ -93,9 +93,11 @@ fun CinemaNavigationBar(
                     },
                 selected = selected == index,
                 onClick = {
-                    selected = index
-                    with(item) {
-                        navController.navigateTo(navOptions)
+                    if (selected != index) {
+                        selected = index
+                        with(item) {
+                            navController.navigateTo(navOptions)
+                        }
                     }
                 },
                 icon = {

@@ -19,3 +19,13 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+
+# classes that interact with retrofit and gson
+-keep class com.akz.cinema.data.detail.source.remote.MovieDetailApi
+-keep class com.akz.cinema.data.movie.source.remote.MovieApi
+-keep class com.akz.cinema.data.movie.source.remote.nowplaying.** { *; }
+-keep class com.akz.cinema.data.detail.source.remote.** { *; }
+-keep class com.akz.cinema.data.movie.source.remote.** { *; }
+
+
