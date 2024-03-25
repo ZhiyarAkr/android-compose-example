@@ -30,8 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,8 +37,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
 import androidx.paging.compose.collectAsLazyPagingItems
-import coil.ImageLoader
-import coil.request.ImageRequest
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.LocalTopAppBarState
 import com.akz.cinema.ui.components.LazyMoviesHorizontalScroll
@@ -57,7 +53,6 @@ fun HomeScreen(
     val moviesOfDay by viewModel.moviesOfDay.collectAsStateWithLifecycle()
     val paletteOutput by viewModel.dominantSwatch.collectAsStateWithLifecycle()
     val moviesStream = viewModel.nowPlayingMoviesStream.collectAsLazyPagingItems()
-    val context = LocalContext.current
     val topAppBarState = LocalTopAppBarState.current
     val paddingValues = LocalPaddings.current
     val scrollState = rememberScrollState()
@@ -86,23 +81,15 @@ fun HomeScreen(
     }
 
 
-    val onClick = remember {
-        { id: Int ->
-            topBarContentOffset = topAppBarState.contentOffset
-            topBarHeightOffset = topAppBarState.heightOffset
-            onDetailPressed(id)
-        }
-    }
-
-
     val secondBgColorOpacity by remember {
         derivedStateOf {
             1 - scrollState.value.toFloat() / scrollState.maxValue
         }
     }
+    val color = MaterialTheme.colorScheme.background
 
     val paletteColorAnimated by animateColorAsState(
-        targetValue = paletteOutput ?: Color.Transparent,
+        targetValue = paletteOutput ?: color,
         label = "palette_color_animation",
         animationSpec = tween(
             durationMillis = 500
@@ -117,36 +104,13 @@ fun HomeScreen(
                     brush = Brush.verticalGradient(
                         colorStops = arrayOf(
                             0f to paletteColorAnimated.copy(alpha = secondBgColorOpacity),
-                            0.8f to Color.Transparent
+                            0.8f to color
                         )
                     )
                 )
             }
     } else {
         Modifier
-    }
-
-    LaunchedEffect(moviesOfDay) {
-        if (moviesOfDay.isNotEmpty()) {
-            moviesOfDay.firstOrNull()?.let { m ->
-                val req = ImageRequest.Builder(context)
-                    .allowHardware(false)
-                    .data("https://image.tmdb.org/t/p/w500/${m.backdropPath}")
-                    .build()
-                val image = ImageLoader(context).execute(req)
-                image.drawable?.let { d ->
-                    viewModel.makePaletteFromDrawable(d, 0.3f)
-                }
-            }
-        }
-    }
-
-    val heroScale = remember {
-        {
-            derivedStateOf {
-                1f - 0.2f * (scrollState.value.toFloat() / scrollState.maxValue)
-            }
-        }
     }
 
     Box(
@@ -161,13 +125,6 @@ fun HomeScreen(
                 .verticalScroll(state = scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-//            HomePageHeroCard(
-//                movie = moviesOfDay.firstOrNull(),
-//                scale = heroScale,
-//                onClick = {
-//                    onDetailPressed(it)
-//                }
-//            )
             HeroCarousel(
                 modifier = Modifier.padding(top = 32.dp),
                 movies = moviesOfDay,
@@ -188,7 +145,7 @@ fun HomeScreen(
                 )
                 LazyMoviesHorizontalScroll(
                     movies = moviesOfWeek,
-                    onClick = onClick
+                    onClick = onDetailPressed
                 )
             }
 
@@ -203,7 +160,7 @@ fun HomeScreen(
                 )
                 LazyMoviesHorizontalScroll(
                     lazyPagingItems = moviesStream,
-                    onClick = onClick
+                    onClick = onDetailPressed
                 )
             }
             Spacer(

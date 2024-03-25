@@ -1,7 +1,6 @@
 package com.akz.cinema.ui.screen.detail
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -47,6 +46,7 @@ import coil.compose.AsyncImage
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.R
 import com.akz.cinema.util.RemoteImageSize
+import com.akz.cinema.util.formatCurrency
 import com.akz.cinema.util.getUriForLocalDetailImage
 import com.akz.cinema.util.getUriForRemoteImage
 import kotlinx.coroutines.launch
@@ -158,8 +158,8 @@ fun DetailScreen(
                 ) {
                     Text(text = "Overview: ${it.overview}")
                     Text(text = "Status: ${it.status}")
-                    Text(text = "Budget: ${it.budget}")
-                    Text(text = "Revenue: ${it.revenue}")
+                    Text(text = "Budget: ${it.budget.formatCurrency()}")
+                    Text(text = "Revenue: ${it.revenue.formatCurrency()}")
                     Text(text = "Release Date: ${it.releaseDate}")
                 }
             }
@@ -186,11 +186,7 @@ fun DetailScreen(
                 onClick = {
                     scope.launch {
                         scrollState.animateScrollTo(
-                            scrollState.maxValue,
-                            animationSpec = tween(
-                                durationMillis = 100,
-                                easing = FastOutSlowInEasing
-                            )
+                            scrollState.maxValue
                         )
                     }
                 }

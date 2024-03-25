@@ -1,6 +1,5 @@
 package com.akz.cinema.ui.screen.home
 
-import android.graphics.drawable.Drawable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,7 +17,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -88,11 +86,6 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    fun makePaletteFromDrawable(drawable: Drawable, lighting: Float) {
-        viewModelScope.launch {
-            paletteManager.makePaletteFromDrawable(drawable, lighting)
-        }
-    }
 
     fun updateSelectedIndex(index: Int) {
         selectedIndex.update {

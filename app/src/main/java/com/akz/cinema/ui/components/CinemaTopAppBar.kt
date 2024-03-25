@@ -23,6 +23,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import com.akz.cinema.lib.Screen
 import kotlinx.coroutines.launch
 
@@ -40,8 +42,9 @@ fun CinemaTopAppBar(
         enter = fadeIn() + slideInVertically(initialOffsetY = { -it }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { -it })
     ) {
+        val density = LocalDensity.current
         val anim = remember {
-            Animatable(-70f, Float.VectorConverter)
+            Animatable(with(density) { 50.dp.toPx() }, Float.VectorConverter)
         }
         val anim2 = remember {
             Animatable(0f, Float.VectorConverter)
@@ -73,7 +76,7 @@ fun CinemaTopAppBar(
                 if (screen.hasBackBtn) {
                     IconButton(
                         modifier = Modifier.graphicsLayer {
-                            rotationZ = anim.value
+                            translationX = anim.value
                             alpha = anim2.value
                         },
                         onClick = onBackPressed

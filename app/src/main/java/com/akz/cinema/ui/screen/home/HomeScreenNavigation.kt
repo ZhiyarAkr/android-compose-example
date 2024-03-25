@@ -7,10 +7,10 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.akz.cinema.util.slideInOrStandardEnter
-import com.akz.cinema.util.slideInOrStandardPopEnter
-import com.akz.cinema.util.slideOutOrStandardExit
-import com.akz.cinema.util.slideOutOrStandardPopExit
+import com.akz.cinema.ui.util.slideInOrStandardEnter
+import com.akz.cinema.ui.util.slideInOrStandardPopEnter
+import com.akz.cinema.ui.util.slideOutOrStandardExit
+import com.akz.cinema.ui.util.slideOutOrStandardPopExit
 
 const val HOME_SCREEN_ROUTE = "home_screen"
 

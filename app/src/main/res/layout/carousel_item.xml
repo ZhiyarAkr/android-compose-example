@@ -9,7 +9,8 @@
     android:layout_marginStart="4dp"
     android:layout_marginEnd="4dp"
     android:foreground="?android:selectableItemBackground"
-    app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge">
+    app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.ExtraLarge"
+    android:elevation="5dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

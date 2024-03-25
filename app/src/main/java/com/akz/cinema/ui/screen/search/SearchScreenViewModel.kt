@@ -2,10 +2,8 @@ package com.akz.cinema.ui.screen.search
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,13 +13,10 @@ import coil.request.SuccessResult
 import com.akz.cinema.data.movie.Movie
 import com.akz.cinema.data.movie.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -37,22 +32,6 @@ class SearchScreenViewModel @Inject constructor(
 
     private val _searchResults = MutableStateFlow<List<Movie>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
-
-    private val _dayMovies = MutableStateFlow<List<Movie>>(emptyList())
-    val dayMovies = _dayMovies.asStateFlow()
-
-    init {
-        try {
-            viewModelScope.launch {
-                val res = movieRepository.fetchMoviesOfDay()
-                _dayMovies.update {
-                    res
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
 
     private val recentSearchResults = movieRepository.observeLocalStoredRecentMovies().stateIn(
         viewModelScope,
@@ -76,29 +55,6 @@ class SearchScreenViewModel @Inject constructor(
     var isHistoryBeingServed by mutableStateOf(true)
         private set
 
-    @OptIn(FlowPreview::class)
-    private val searchQueryDebounced = snapshotFlow { searchQuery }.debounce(1000).onEach {
-        if (it.isNotBlank()) {
-            try {
-                val result = movieRepository.searchMovieByQuery(it)
-                isHistoryBeingServed = false
-                _searchResults.update {
-                    result
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        } else {
-            isHistoryBeingServed = true
-            _searchResults.update {
-                recentSearchResults.value
-            }
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        ""
-    )
 
     fun updateSearchQuery(query: String) {
         searchQuery = query
@@ -107,6 +63,29 @@ class SearchScreenViewModel @Inject constructor(
     fun updateIsSearchBarActive(isActive: Boolean) {
         isSearchBarActive = isActive
     }
+
+    fun searchMovies() {
+        viewModelScope.launch {
+            if (searchQuery.isNotBlank()) {
+                try {
+                    val result = movieRepository.searchMovieByQuery(searchQuery)
+                    isHistoryBeingServed = false
+                    _searchResults.update {
+                        result
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            } else {
+                isHistoryBeingServed = true
+                _searchResults.update {
+                    recentSearchResults.value
+                }
+            }
+        }
+    }
+
+
 
     fun onEvent(event: SearchEvent) {
         when (event) {

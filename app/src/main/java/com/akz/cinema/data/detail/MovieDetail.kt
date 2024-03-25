@@ -23,7 +23,6 @@ data class MovieDetail(
     val revenue: Int,
     val isSavedInLocal: Boolean = false
 )
-
 fun MovieDetail.toLocal() = LocalMovieDetail(
     id = id,
     isAdult = isAdult,
@@ -37,5 +36,4 @@ fun MovieDetail.toLocal() = LocalMovieDetail(
     revenue = revenue,
     createdAt = ""
 )
-
 fun List<MovieDetail>.toLocal(): List<LocalMovieDetail> = map(MovieDetail::toLocal)

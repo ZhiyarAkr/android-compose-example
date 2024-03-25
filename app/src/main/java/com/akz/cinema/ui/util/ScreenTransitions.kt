@@ -1,4 +1,4 @@
-package com.akz.cinema.util
+package com.akz.cinema.ui.util
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
@@ -19,7 +19,7 @@ fun AnimatedContentTransitionScope<NavBackStackEntry>.slideInOrStandardEnter(): 
                 initialOffsetX = {offset ->
                     offset
                 }
-            )
+            ) + fadeIn()
         } else {
             null
         }
@@ -34,7 +34,7 @@ fun AnimatedContentTransitionScope<NavBackStackEntry>.slideInOrStandardPopEnter(
                 initialOffsetX = {offset ->
                     -offset
                 }
-            )
+            ) + fadeIn()
         } else {
             null
         }
@@ -48,7 +48,7 @@ fun AnimatedContentTransitionScope<NavBackStackEntry>.slideOutOrStandardExit(): 
                 targetOffsetX = {offset ->
                     -offset
                 }
-            )
+            ) + fadeOut()
         } else null
     } ?: return scaleOut(targetScale = 0.8f) + fadeOut()
 }
@@ -61,7 +61,7 @@ fun AnimatedContentTransitionScope<NavBackStackEntry>.slideOutOrStandardPopExit(
                 targetOffsetX = {offset ->
                     offset
                 }
-            )
+            ) + fadeOut()
         } else null
     } ?: return scaleOut(targetScale = 0.8f) + fadeOut()
 }

@@ -2,11 +2,8 @@ package com.akz.cinema.data.detail.worker
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
 import androidx.work.CoroutineWorker
-import androidx.work.ListenableWorker
-import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import coil.ImageLoader
 import coil.request.ImageRequest
@@ -20,8 +17,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.io.File
 import java.time.Instant
-
-const val WorkerTag = "SaveWorkerDebugTag"
 
 class SaveMovieDetailsToLocalWorker @AssistedInject constructor(
     @Assisted private val context: Context,
@@ -45,7 +40,7 @@ class SaveMovieDetailsToLocalWorker @AssistedInject constructor(
             if (!folder.exists()) {
                 folder.mkdir()
             }
-            val fileName = getRandomName(res.backdropPath)
+            val fileName = getRandomName()
             val file = File(folder, fileName)
             file.outputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, file.outputStream())
@@ -59,7 +54,7 @@ class SaveMovieDetailsToLocalWorker @AssistedInject constructor(
         }
     }
 
-    private fun getRandomName(backdrop: String): String {
+    private fun getRandomName(): String {
         val instant = Instant.now().toEpochMilli()
         return "${instant}_detailImage.jpg"
     }

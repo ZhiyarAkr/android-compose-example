@@ -8,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -20,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.recyclerview.widget.RecyclerView
 import com.akz.cinema.data.movie.Movie
-import com.akz.cinema.ui.screen.home.carousel.uitls.OnSnapPositionChangeListener
 import com.akz.cinema.ui.screen.home.carousel.uitls.OnSnapPositionChangeListenerImpl
 import com.akz.cinema.ui.screen.home.carousel.uitls.SnapOnScrollListener
 import com.google.android.material.carousel.CarouselLayoutManager

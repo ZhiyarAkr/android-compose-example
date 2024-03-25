@@ -10,10 +10,10 @@ import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.akz.cinema.util.slideInOrStandardEnter
-import com.akz.cinema.util.slideInOrStandardPopEnter
-import com.akz.cinema.util.slideOutOrStandardExit
-import com.akz.cinema.util.slideOutOrStandardPopExit
+import com.akz.cinema.ui.util.slideInOrStandardEnter
+import com.akz.cinema.ui.util.slideInOrStandardPopEnter
+import com.akz.cinema.ui.util.slideOutOrStandardExit
+import com.akz.cinema.ui.util.slideOutOrStandardPopExit
 
 const val DETAIL_SCREEN_ROUTE = "detail_screen/{movieId}?transition={transition}"
 
