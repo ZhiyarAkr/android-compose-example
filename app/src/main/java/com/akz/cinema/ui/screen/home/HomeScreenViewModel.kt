@@ -31,8 +31,6 @@ class HomeScreenViewModel @Inject constructor(
     var topPadding by mutableStateOf(0.dp)
         private set
 
-    private val selectedIndex = MutableStateFlow(0)
-
     var bottomPadding by mutableStateOf(0.dp)
         private set
 
@@ -53,6 +51,10 @@ class HomeScreenViewModel @Inject constructor(
         .cachedIn(viewModelScope)
 
     init {
+        refreshMovies()
+    }
+
+    private fun refreshMovies() {
         viewModelScope.launch {
             try {
                 val dayMovies = movieRepository.fetchMoviesOfDay()
@@ -87,25 +89,10 @@ class HomeScreenViewModel @Inject constructor(
     }
 
 
-    fun updateSelectedIndex(index: Int) {
-        selectedIndex.update {
-            index
-        }
-    }
-
     fun onEvent(event: HomeEvent) {
         when (event) {
-            is HomeEvent.SaveAllMovies -> {
-                viewModelScope.launch {
-                    try {
-                        movieRepository.deleteAllMovies()
-                        movieRepository.saveMoviesToLocal(
-                            event.movies
-                        )
-                    } catch (e: Throwable) {
-                        e.printStackTrace()
-                    }
-                }
+            HomeEvent.RefreshMovies -> {
+                refreshMovies()
             }
         }
     }

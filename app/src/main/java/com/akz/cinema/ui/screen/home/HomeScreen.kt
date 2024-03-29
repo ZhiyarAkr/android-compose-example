@@ -18,18 +18,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,9 +38,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.akz.cinema.LocalPaddings
-import com.akz.cinema.LocalTopAppBarState
 import com.akz.cinema.ui.components.LazyMoviesHorizontalScroll
 import com.akz.cinema.ui.screen.home.carousel.HeroCarousel
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,16 +53,9 @@ fun HomeScreen(
     val moviesOfDay by viewModel.moviesOfDay.collectAsStateWithLifecycle()
     val paletteOutput by viewModel.dominantSwatch.collectAsStateWithLifecycle()
     val moviesStream = viewModel.nowPlayingMoviesStream.collectAsLazyPagingItems()
-    val topAppBarState = LocalTopAppBarState.current
     val paddingValues = LocalPaddings.current
     val scrollState = rememberScrollState()
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
-    var topBarHeightOffset by rememberSaveable {
-        mutableFloatStateOf(0f)
-    }
-    var topBarContentOffset by rememberSaveable {
-        mutableFloatStateOf(0f)
-    }
 
     LaunchedEffect(paddingValues, lifecycleState) {
         if (lifecycleState == Lifecycle.State.RESUMED) {
@@ -70,16 +63,12 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        topAppBarState.contentOffset = topBarContentOffset
-        topAppBarState.heightOffset = topBarHeightOffset
-    }
-
     val padding = LocalPaddings.current.calculateTopPadding()
     LaunchedEffect(padding) {
         viewModel.updateTopPadding(padding)
     }
 
+    val pullToRefreshState = rememberPullToRefreshState()
 
     val secondBgColorOpacity by remember {
         derivedStateOf {
@@ -113,10 +102,18 @@ fun HomeScreen(
         Modifier
     }
 
+    LaunchedEffect(pullToRefreshState.isRefreshing) {
+        viewModel.onEvent(HomeEvent.RefreshMovies)
+        moviesStream.refresh()
+        delay(1000)
+        pullToRefreshState.endRefresh()
+    }
+
     Box(
         modifier = mainScreenModifier
             .fillMaxSize()
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            .nestedScroll(pullToRefreshState.nestedScrollConnection),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -170,5 +167,9 @@ fun HomeScreen(
                     .height(viewModel.bottomPadding)
             )
         }
+        PullToRefreshContainer(
+            modifier = Modifier.align(Alignment.TopCenter),
+            state = pullToRefreshState
+        )
     }
 }
