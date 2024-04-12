@@ -8,7 +8,7 @@ the app consists of three top level screens:
 - Search
 - Bookmarks
 
-![Home Screen](screen.gif) ![Screenshot1](Screenshot1.png) ![Screenshot2](Screenshot2.png) ![Screenshot3](Screenshot3.png) ![Screenshot4](Screenshot4.png)
+<img src="screen.gif" width="400" /> <img src="Screenshot4.png" width="400"/> <img src="Screenshot3.png" width="400"/> <img src="Screenshot2.png" width="400"/> <img src="Screenshot1.png" width="400"/>
 
 # Building and compiling
 for you to be able to build the app you must first include a file in the root project called **local.properties** in which you specify your [TMDB](https://www.themoviedb.org) access token like this:
