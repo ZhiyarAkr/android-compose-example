@@ -8,6 +8,7 @@ the app consists of three top level screens:
 - Search
 - Bookmarks
 
+## Screenshots
 <img src="screen.gif" width="400" />
 
 <img src="Screenshot4.png" width="400"/> <img src="Screenshot3.png" width="400"/> <img src="Screenshot1.png" width="400"/>
