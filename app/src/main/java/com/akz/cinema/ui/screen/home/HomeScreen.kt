@@ -70,9 +70,10 @@ fun HomeScreen(
 
     val pullToRefreshState = rememberPullToRefreshState()
 
-    val secondBgColorOpacity by remember {
+    val secondBgColorOpacity by remember(scrollState.maxValue) {
+        val div = if (scrollState.maxValue > 0) scrollState.maxValue else Float.MAX_VALUE
         derivedStateOf {
-            1 - scrollState.value.toFloat() / scrollState.maxValue
+            1 - scrollState.value.toFloat() / div.toFloat()
         }
     }
     val color = MaterialTheme.colorScheme.background
@@ -167,9 +168,16 @@ fun HomeScreen(
                     .height(viewModel.bottomPadding)
             )
         }
-        PullToRefreshContainer(
-            modifier = Modifier.align(Alignment.TopCenter),
-            state = pullToRefreshState
-        )
+        val showPullToRefreshContainer by remember {
+            derivedStateOf {
+                pullToRefreshState.verticalOffset > 0
+            }
+        }
+        if (showPullToRefreshContainer) {
+            PullToRefreshContainer(
+                modifier = Modifier.align(Alignment.TopCenter),
+                state = pullToRefreshState
+            )
+        }
     }
 }

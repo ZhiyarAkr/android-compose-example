@@ -9,4 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="carousel_text_background">#66000000</color>
+    <color name="background">#FFFFFBFF</color>
 </resources>
