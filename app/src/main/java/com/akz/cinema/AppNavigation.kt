@@ -1,5 +1,7 @@
 package com.akz.cinema
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,7 +42,7 @@ val LocalHideNavBar = compositionLocalOf {
     mutableStateOf(false)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppNavigation(
     viewModel: MainActivityViewModel = hiltViewModel()
@@ -96,29 +98,34 @@ fun AppNavigation(
             LocalTopAppBarState provides topAppBarState,
             LocalHideNavBar provides hideNavBar
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = HOME_SCREEN_ROUTE
+            SharedTransitionLayout(
+                modifier = Modifier.fillMaxSize()
             ) {
-                homeScreenNavGraph(
-                    onDetailPressed = { movieId ->
-                        navController.navigateToDetailScreen(movieId)
-                    }
-                )
-
-                detailScreenNavGraph(
-                    onBackPressed = navController::popBackStack
-                )
-                searchScreenNavGraph(
-                    onDetailPressed = { movieId ->
-                        navController.navigateToDetailScreen(movieId)
-                    }
-                )
-                savedScreenGraph(
-                    onDetail = {
-                        navController.navigateToDetailScreen(it)
-                    }
-                )
+                NavHost(
+                    navController = navController,
+                    startDestination = HOME_SCREEN_ROUTE
+                ) {
+                    homeScreenNavGraph(
+                        onDetailPressed = { movieId ->
+                            navController.navigateToDetailScreen(movieId)
+                        }
+                    )
+                    detailScreenNavGraph(
+                        onBackPressed = navController::popBackStack,
+                        sharedTransitionScope = this@SharedTransitionLayout
+                    )
+                    searchScreenNavGraph(
+                        onDetailPressed = { movieId ->
+                            navController.navigateToDetailScreen(movieId)
+                        }
+                    )
+                    savedScreenGraph(
+                        onDetail = {
+                            navController.navigateToDetailScreen(it)
+                        },
+                        sharedTransitionScope = this@SharedTransitionLayout
+                    )
+                }
             }
         }
     }

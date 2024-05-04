@@ -18,22 +18,25 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -41,6 +44,7 @@ import com.akz.cinema.LocalPaddings
 import com.akz.cinema.ui.components.LazyMoviesHorizontalScroll
 import com.akz.cinema.ui.screen.home.carousel.HeroCarousel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,81 +107,103 @@ fun HomeScreen(
         Modifier
     }
 
-    LaunchedEffect(pullToRefreshState.isRefreshing) {
-        viewModel.onEvent(HomeEvent.RefreshMovies)
-        moviesStream.refresh()
-        delay(1000)
-        pullToRefreshState.endRefresh()
-    }
+    var isRefreshing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
 
     Box(
         modifier = mainScreenModifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .nestedScroll(pullToRefreshState.nestedScrollConnection),
+            .statusBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(state = scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            HeroCarousel(
-                modifier = Modifier.padding(top = 32.dp),
-                movies = moviesOfDay,
-                onClick = onDetailPressed,
-                onPositionChange = viewModel::makePaletteFromMovieIndex
-            )
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            state = pullToRefreshState,
+            onRefresh = { isRefreshing = true
+                scope.launch {
+                    viewModel.onEvent(HomeEvent.RefreshMovies)
+                    moviesStream.refresh()
+                    delay(1000)
+                    isRefreshing = false
+                }
+            }) {
 
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxSize()
+                    .verticalScroll(state = scrollState),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "Top movies of the week",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(start = 16.dp)
+                HeroCarousel(
+                    modifier = Modifier.padding(top = 32.dp),
+                    movies = moviesOfDay,
+                    onClick = onDetailPressed,
+                    onPositionChange = viewModel::makePaletteFromMovieIndex
                 )
-                LazyMoviesHorizontalScroll(
-                    movies = moviesOfWeek,
-                    onClick = onDetailPressed
-                )
-            }
+//            HorizontalMultiBrowseCarousel(
+//                modifier = Modifier
+//                    .width(412.dp)
+//                    .height(221.dp),
+//                state = rememberCarouselState {
+//                    moviesOfDay.size
+//                },
+//                itemSpacing = 8.dp,
+//                preferredItemWidth = 186.dp
+//            ) {
+//                Card(
+//                    modifier = Modifier.height(205.dp)
+//                ) {
+//                    AsyncImage(
+//                        modifier = Modifier.fillMaxSize(),
+//                        model = getUriForRemoteImage(
+//                            moviesOfDay[it].backdropPath,
+//                            RemoteImageSize.ImageSizeW780
+//                        ),
+//                        contentDescription = null,
+//                        contentScale = ContentScale.Crop
+//                    )
+//                }
+//            }
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Now playing movies",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-                LazyMoviesHorizontalScroll(
-                    lazyPagingItems = moviesStream,
-                    onClick = onDetailPressed
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Top movies of the week",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                    LazyMoviesHorizontalScroll(
+                        movies = moviesOfWeek,
+                        onClick = onDetailPressed
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Now playing movies",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                    LazyMoviesHorizontalScroll(
+                        lazyPagingItems = moviesStream,
+                        onClick = onDetailPressed
+                    )
+                }
+                Spacer(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                        .height(viewModel.bottomPadding)
                 )
             }
-            Spacer(
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .fillMaxWidth()
-                    .height(viewModel.bottomPadding)
-            )
-        }
-        val showPullToRefreshContainer by remember {
-            derivedStateOf {
-                pullToRefreshState.verticalOffset > 0
-            }
-        }
-        if (showPullToRefreshContainer) {
-            PullToRefreshContainer(
-                modifier = Modifier.align(Alignment.TopCenter),
-                state = pullToRefreshState
-            )
         }
     }
 }

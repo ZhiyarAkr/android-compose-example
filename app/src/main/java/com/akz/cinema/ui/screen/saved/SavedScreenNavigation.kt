@@ -1,6 +1,8 @@
 package com.akz.cinema.ui.screen.saved
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -13,8 +15,10 @@ import com.akz.cinema.ui.util.slideOutOrStandardExit
 import com.akz.cinema.ui.util.slideOutOrStandardPopExit
 
 const val SavedScreenRoute = "saved_screen"
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.savedScreenGraph(
-    onDetail: (Int) -> Unit
+    onDetail: (Int) -> Unit,
+    sharedTransitionScope: SharedTransitionScope
 ) {
     composable(
         route = SavedScreenRoute,
@@ -24,7 +28,7 @@ fun NavGraphBuilder.savedScreenGraph(
         popEnterTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideInOrStandardPopEnter,
         popExitTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideOutOrStandardPopExit,
     ) {
-        SavedScreen(onDetail = onDetail)
+        SavedScreen(onDetail = onDetail, sharedTransitionScope = sharedTransitionScope, animatedContentScope = this)
     }
 }
 

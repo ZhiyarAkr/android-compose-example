@@ -14,7 +14,6 @@ import com.akz.cinema.ui.util.slideOutOrStandardPopExit
 
 const val HOME_SCREEN_ROUTE = "home_screen"
 
-
 fun NavGraphBuilder.homeScreenNavGraph(
     onDetailPressed: (Int) -> Unit,
 ) {

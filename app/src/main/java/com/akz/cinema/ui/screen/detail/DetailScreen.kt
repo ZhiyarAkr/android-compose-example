@@ -1,6 +1,12 @@
 package com.akz.cinema.ui.screen.detail
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,11 +21,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,13 +44,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.R
 import com.akz.cinema.util.RemoteImageSize
@@ -51,17 +62,21 @@ import com.akz.cinema.util.getUriForLocalDetailImage
 import com.akz.cinema.util.getUriForRemoteImage
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun DetailScreen(
     viewModel: DetailScreenViewModel = hiltViewModel(),
     movieId: Int?,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
 ) {
     val movie by viewModel.movieDetail.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val paddingValues = LocalPaddings.current
     val context = LocalContext.current
+    val density = LocalDensity.current
 
     val showScrollIcon by remember {
         derivedStateOf {
@@ -87,6 +102,10 @@ fun DetailScreen(
         viewModel.onEvent(DetailEvent.EnqueueLocalStorageWorkers)
     }
 
+    val imageEnterAnimation = remember {
+        Animatable(with(density) { 64.dp.roundToPx() }, Int.VectorConverter)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,18 +121,53 @@ fun DetailScreen(
             verticalArrangement = Arrangement.Top
         ) {
             movie?.let {
-                AsyncImage(
-                    model = if (it.isSavedInLocal) getUriForLocalDetailImage(
-                        it.backdropPath,
-                        context
-                    ) else getUriForRemoteImage(it.backdropPath, RemoteImageSize.ImageSizeW780),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                )
-
+                with(sharedTransitionScope) {
+                    AsyncImage(
+                        model = if (it.isSavedInLocal) ImageRequest.Builder(context)
+                            .data(getUriForLocalDetailImage(it.backdropPath, context))
+                            .memoryCacheKey("image_${it.id}")
+                            .placeholderMemoryCacheKey("image_${it.id}")
+                            .build() else ImageRequest.Builder(context)
+                            .data(
+                                getUriForRemoteImage(
+                                    it.backdropPath,
+                                    RemoteImageSize.ImageSizeW780
+                                )
+                            )
+                            .memoryCacheKey("image_${it.id}")
+                            .placeholderMemoryCacheKey("image_${it.id}")
+                            .build(),
+                        contentDescription = null,
+                        onSuccess = {
+                            scope.launch {
+                                imageEnterAnimation.animateTo(
+                                    targetValue = 0,
+                                    animationSpec = tween(
+                                        delayMillis = 300,
+                                        durationMillis = 100,
+                                        easing = androidx.compose.animation.core.EaseInExpo
+                                    )
+                                )
+                            }
+                        },
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .offset {
+                                IntOffset(
+                                    x = imageEnterAnimation.value,
+                                    y = 0
+                                )
+                            }
+                            .sharedBounds(
+                                rememberSharedContentState(key = "image_${it.id}"),
+                                animatedContentScope,
+                                enter = EnterTransition.None,
+                                exit = fadeOut(),
+                            )
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -121,13 +175,20 @@ fun DetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = it.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 3,
-                        softWrap = true,
-                        modifier = Modifier.weight(1f)
-                    )
+                    with(sharedTransitionScope) {
+                        Text(
+                            text = it.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 3,
+                            softWrap = true,
+                            modifier = Modifier
+                                .weight(1f)
+                                .sharedBounds(
+                                    rememberSharedContentState("title_${it.id}"),
+                                    animatedContentScope
+                                )
+                        )
+                    }
                     IconButton(
                         onClick = {
                             if (viewModel.saveToLocal) {
@@ -183,6 +244,9 @@ fun DetailScreen(
             )
         ) {
             IconButton(
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Black.copy( alpha = 0.3f)
+                ),
                 onClick = {
                     scope.launch {
                         scrollState.animateScrollTo(

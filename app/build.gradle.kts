@@ -47,13 +47,14 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs = listOf("-Xcontext-receivers")
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.12"
     }
     packaging {
         resources {
@@ -83,22 +84,24 @@ dependencies {
 
     val navVersion = "2.7.7"
     val lifecycleVersion = "2.7.0"
-    val material3Version = "1.2.1"
+    val material3Version = "1.3.0-alpha06"
     val roomVersion = "2.6.1"
     val pagingVersion = "3.2.1"
 
-    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-ktx:1.13.1")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.23"))
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2024.04.00"))
-    implementation("androidx.compose.ui:ui")
+    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
+    implementation("androidx.compose.animation:animation:1.7.0-alpha08")
+    implementation("androidx.compose.animation:animation-core:1.7.0-alpha08")
+    implementation("androidx.compose.ui:ui:1.7.0-alpha08")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.05.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -107,7 +110,7 @@ dependencies {
     //*************************************
     implementation("androidx.compose.material3:material3:$material3Version")
     implementation("androidx.compose.material3:material3-window-size-class")
-    implementation("androidx.compose.ui:ui-util:")
+    implementation("androidx.compose.ui:ui-util")
 
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
@@ -165,7 +168,7 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.2.0")
 
     //views material
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.12.0")
 
     //splashscreen
     implementation("androidx.core:core-splashscreen:1.0.1")

@@ -36,14 +36,20 @@ class HeroAdapter(
                 maskRect ->
             // Any custom motion to run when mask size changes
             holder.imageTitle.translationX = maskRect.left
-            holder.imageTitle.setAlpha(lerp(1F, 0F, (maskRect.left - 0F) / 80F))
+            holder.imageTitle.setAlpha(lerp(1F, 0F, maskRect.left / 80F))
         }
         holder.imageTitle.text = movies[position].title
         holder.imageView.load(
             getUriForRemoteImage(
                 movies[position].backdropPath,
                 RemoteImageSize.ImageSizeW780
-            )
+            ),
+            builder = {
+                crossfade(true)
+                memoryCacheKey("image_${movies[position].id}")
+                placeholderMemoryCacheKey("image_${movies[position].id}")
+                build()
+            }
         )
     }
 

@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -79,126 +80,136 @@ fun SearchScreen(
             viewModel.searchMovies()
         }
 
+        val onActiveChange = { it: Boolean ->
+            viewModel.updateIsSearchBarActive(it)
+        }
         SearchBar(
-            modifier = Modifier.align(Alignment.TopCenter),
-            query = viewModel.searchQuery,
-            onQueryChange = {
-                viewModel.updateSearchQuery(it)
-            },
-            onSearch = {
-                viewModel.onEvent(
-                    SearchEvent.HideKeyboard(keyboardController)
-                )
-            },
-            active = viewModel.isSearchBarActive,
-            onActiveChange = {
-                viewModel.updateIsSearchBarActive(it)
-            },
-            placeholder = {
-                Text(text = "Search movies...")
-            },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
-            },
-            trailingIcon = {
-                if (viewModel.isSearchBarActive) {
-                    IconButton(
-                        onClick = {
-                            if (viewModel.searchQuery.isEmpty()) {
-                                viewModel.updateIsSearchBarActive(false)
-                            } else {
-                                viewModel.updateSearchQuery("")
+            inputField = {
+                SearchBarDefaults.InputField(
+                    query = viewModel.searchQuery,
+                    onQueryChange = {
+                        viewModel.updateSearchQuery(it)
+                    },
+                    onSearch = {
+                        viewModel.onEvent(
+                            SearchEvent.HideKeyboard(keyboardController)
+                        )
+                    },
+                    expanded = viewModel.isSearchBarActive,
+                    onExpandedChange = onActiveChange,
+                    enabled = true,
+                    placeholder = {
+                        Text(text = "Search movies...")
+                    },
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    },
+                    trailingIcon = {
+                        if (viewModel.isSearchBarActive) {
+                            IconButton(
+                                onClick = {
+                                    if (viewModel.searchQuery.isEmpty()) {
+                                        viewModel.updateIsSearchBarActive(false)
+                                    } else {
+                                        viewModel.updateSearchQuery("")
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close search"
+                                )
                             }
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close search"
-                        )
-                    }
-                }
-            }
-        ) {
-            val listItemModifier = Modifier
-                .fillMaxWidth()
-                .height(128.dp)
-            AnimatedVisibility(
-                visible = viewModel.isHistoryBeingServed,
-                enter = fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 200
-                    )
-                ),
-                exit = fadeOut(
-                    animationSpec = tween(
-                        durationMillis = 200
-                    )
+                    },
+                    interactionSource = null,
                 )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(start = 16.dp, top = 16.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Recent: ",
-                        style = MaterialTheme.typography.titleLarge,
+            },
+            expanded = viewModel.isSearchBarActive,
+            onExpandedChange = onActiveChange,
+            modifier = Modifier.align(Alignment.TopCenter),
+            windowInsets = SearchBarDefaults.windowInsets,
+            content = {
+                val listItemModifier = Modifier
+                    .fillMaxWidth()
+                    .height(128.dp)
+                AnimatedVisibility(
+                    visible = viewModel.isHistoryBeingServed,
+                    enter = fadeIn(
+                        animationSpec = tween(
+                            durationMillis = 200
+                        )
+                    ),
+                    exit = fadeOut(
+                        animationSpec = tween(
+                            durationMillis = 200
+                        )
                     )
-                    recentCount?.let {
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(start = 16.dp, top = 16.dp)
+                            .fillMaxWidth()
+                    ) {
                         Text(
-                            text = "$it found",
+                            text = "Recent: ",
                             style = MaterialTheme.typography.titleLarge,
                         )
-                    }
-                }
-            }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .navigationBarsPadding(),
-            ) {
-                items(items = searchResults) { movie ->
-                    ListItem(
-                        modifier = listItemModifier.clickable {
-                            viewModel.onEvent(SearchEvent.SaveToRecent(movie, context))
-                            onDetailPressed(movie.id)
-                        },
-                        headlineContent = {
+                        recentCount?.let {
                             Text(
-                                text = movie.title,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        },
-                        leadingContent = {
-                            movie.backdropPath?.let { backDrop ->
-                                val path =
-                                    if (movie.isImagePathAbsolute) backDrop else "https://image.tmdb.org/t/p/w500/$backDrop"
-                                AsyncImage(
-                                    model = path,
-                                    contentDescription = "Movie Photo",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .width(150.dp)
-                                        .fillMaxHeight()
-                                        .clip(RoundedCornerShape(8.dp))
-                                )
-                            } ?: Skeleton(
-                                modifier = Modifier
-                                    .width(150.dp)
-                                    .height(100.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                            )
-                        },
-                        supportingContent = {
-                            Text(
-                                text = movie.overview,
-                                overflow = TextOverflow.Ellipsis
+                                text = "$it found",
+                                style = MaterialTheme.typography.titleLarge,
                             )
                         }
-                    )
+                    }
                 }
-            }
-        }
-
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .navigationBarsPadding(),
+                ) {
+                    items(items = searchResults) { movie ->
+                        ListItem(
+                            modifier = listItemModifier.clickable {
+                                viewModel.onEvent(SearchEvent.SaveToRecent(movie, context))
+                                onDetailPressed(movie.id)
+                            },
+                            headlineContent = {
+                                Text(
+                                    text = movie.title,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
+                            leadingContent = {
+                                movie.backdropPath?.let { backDrop ->
+                                    val path =
+                                        if (movie.isImagePathAbsolute) backDrop else "https://image.tmdb.org/t/p/w500/$backDrop"
+                                    AsyncImage(
+                                        model = path,
+                                        contentDescription = "Movie Photo",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .width(150.dp)
+                                            .fillMaxHeight()
+                                            .clip(RoundedCornerShape(8.dp))
+                                    )
+                                } ?: Skeleton(
+                                    modifier = Modifier
+                                        .width(150.dp)
+                                        .height(100.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = movie.overview,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        )
+                    }
+                }
+            },
+        )
     }
 }

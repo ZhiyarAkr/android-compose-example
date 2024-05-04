@@ -2,6 +2,8 @@ package com.akz.cinema.ui.screen.detail
 
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -17,8 +19,10 @@ import com.akz.cinema.ui.util.slideOutOrStandardPopExit
 
 const val DETAIL_SCREEN_ROUTE = "detail_screen/{movieId}?transition={transition}"
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.detailScreenNavGraph(
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope
 ) {
     composable(
         route = DETAIL_SCREEN_ROUTE,
@@ -41,11 +45,20 @@ fun NavGraphBuilder.detailScreenNavGraph(
         popExitTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideOutOrStandardPopExit,
     ) {
         val movieId = it.arguments?.getInt("movieId")
-        DetailScreen(movieId = movieId, onBackPressed = onBackPressed)
+        DetailScreen(
+            movieId = movieId,
+            onBackPressed = onBackPressed,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = this
+        )
     }
 }
 
-fun NavController.navigateToDetailScreen(movieId: Int, transition: Int = 1, navOptions: NavOptions? = null) {
+fun NavController.navigateToDetailScreen(
+    movieId: Int,
+    transition: Int = 1,
+    navOptions: NavOptions? = null
+) {
     navigate(
         route = DETAIL_SCREEN_ROUTE.replace(
             "{movieId}",

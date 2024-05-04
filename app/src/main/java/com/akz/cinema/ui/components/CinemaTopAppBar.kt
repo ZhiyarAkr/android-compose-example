@@ -71,7 +71,6 @@ fun CinemaTopAppBar(
             }
         }
         TopAppBar(
-            scrollBehavior = scrollBehavior,
             navigationIcon = {
                 if (screen.hasBackBtn) {
                     IconButton(
