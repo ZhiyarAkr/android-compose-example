@@ -82,7 +82,7 @@ ksp {
 
 dependencies {
 
-    val navVersion = "2.7.7"
+    val navVersion = "2.8.0-alpha08"
     val lifecycleVersion = "2.7.0"
     val material3Version = "1.3.0-alpha06"
     val roomVersion = "2.6.1"
