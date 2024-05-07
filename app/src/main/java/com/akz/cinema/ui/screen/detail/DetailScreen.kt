@@ -1,5 +1,6 @@
 package com.akz.cinema.ui.screen.detail
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -51,9 +52,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.akz.cinema.LocalCanGoBack
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.R
 import com.akz.cinema.util.RemoteImageSize
@@ -77,6 +81,8 @@ fun DetailScreen(
     val paddingValues = LocalPaddings.current
     val context = LocalContext.current
     val density = LocalDensity.current
+    var canGoBack by LocalCanGoBack.current
+    val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
 
     val showScrollIcon by remember {
         derivedStateOf {
@@ -86,6 +92,16 @@ fun DetailScreen(
 
     var topPadding by remember {
         mutableStateOf(0.dp)
+    }
+
+    BackHandler(enabled = !lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) {
+
+    }
+
+    LaunchedEffect(lifecycleState) {
+        if (lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) {
+            canGoBack = true
+        }
     }
 
     LaunchedEffect(paddingValues) {
@@ -160,11 +176,11 @@ fun DetailScreen(
                                     y = 0
                                 )
                             }
-                            .sharedBounds(
+                            .sharedElement(
                                 rememberSharedContentState(key = "image_${it.id}"),
                                 animatedContentScope,
-                                enter = EnterTransition.None,
-                                exit = fadeOut(),
+//                                enter = EnterTransition.None,
+//                                exit = fadeOut(),
                             )
                     )
                 }

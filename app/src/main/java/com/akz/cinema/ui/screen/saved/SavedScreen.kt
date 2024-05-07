@@ -1,8 +1,6 @@
 package com.akz.cinema.ui.screen.saved
 
 import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
@@ -28,6 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,7 +77,7 @@ fun SavedScreenContent(
                 movies = movies,
                 onDetail = onDetail,
                 sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = animatedContentScope
+                animatedContentScope = animatedContentScope,
             )
         } else {
             Text(
@@ -108,7 +109,7 @@ private fun SavedScreenLazyColumn(
     movies: List<MovieDetail>,
     onDetail: (Int) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope
+    animatedContentScope: AnimatedContentScope,
 ) {
     LazyColumn(
         modifier = modifier
@@ -153,6 +154,7 @@ private fun MovieItem(
             modifier = modifier
                 .fillMaxWidth(0.9f)
                 .height(400.dp),
+            shape = RoundedCornerShape(16.dp),
             onClick = {
                 if (lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) {
                     onClick(movie.id)
@@ -177,14 +179,14 @@ private fun MovieItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .sharedBounds(
+                        .sharedElement(
                             rememberSharedContentState(key = "image_${movie.id}"),
                             animatedVisibilityScope = animatedContentScope,
-                            enter = EnterTransition.None,
-                            exit = ExitTransition.None,
-                            zIndexInOverlay = 1f
+//                            enter = EnterTransition.None,
+//                            exit = ExitTransition.None,
+//                            zIndexInOverlay = 1f
                         )
-                        .clip(CardDefaults.shape)
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                 )
             }
             Spacer(

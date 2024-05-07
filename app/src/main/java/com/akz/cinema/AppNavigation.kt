@@ -42,6 +42,10 @@ val LocalHideNavBar = compositionLocalOf {
     mutableStateOf(false)
 }
 
+val LocalCanGoBack = compositionLocalOf {
+    mutableStateOf(false)
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppNavigation(
@@ -58,12 +62,16 @@ fun AppNavigation(
         }
     }
     val backStackEntry by navController.currentBackStackEntryAsState()
+    val canGoBack = remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
         state = topAppBarState,
         canScroll = {
             screen.topAppBarScrollable
         }
     )
+    navController.addOnDestinationChangedListener { _, _, _ ->
+        canGoBack.value = false
+    }
 
     LaunchedEffect(backStackEntry) {
         screen = backStackEntry?.destination?.getScreen() ?: Screen.Home
@@ -84,19 +92,26 @@ fun AppNavigation(
             )
         },
         topBar = {
-            CinemaTopAppBar(
-                screen = screen,
-                onBackPressed = {
-                    navController.popBackStack()
-                },
-                scrollBehavior = scrollBehavior
-            )
+            CompositionLocalProvider(
+                LocalCanGoBack provides canGoBack
+            ) {
+                CinemaTopAppBar(
+                    screen = screen,
+                    onBackPressed = {
+                        if (canGoBack.value) {
+                            navController.popBackStack()
+                        }
+                    },
+                    scrollBehavior = scrollBehavior
+                )
+            }
         }
     ) { paddings ->
         CompositionLocalProvider(
             LocalPaddings provides paddings,
             LocalTopAppBarState provides topAppBarState,
-            LocalHideNavBar provides hideNavBar
+            LocalHideNavBar provides hideNavBar,
+            LocalCanGoBack provides canGoBack
         ) {
             SharedTransitionLayout(
                 modifier = Modifier.fillMaxSize()
