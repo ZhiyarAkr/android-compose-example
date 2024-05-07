@@ -3,7 +3,11 @@
     android:height="240dp"
     android:viewportWidth="240"
     android:viewportHeight="240">
-    <group>
+    <group
+        android:name="logoGroup"
+        android:pivotX="120"
+        android:pivotY="120"
+        >
         <clip-path
             android:pathData="M40,40h160v160h-160z"/>
         <path
