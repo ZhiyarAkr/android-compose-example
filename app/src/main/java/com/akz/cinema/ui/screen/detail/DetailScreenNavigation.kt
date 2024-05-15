@@ -11,7 +11,6 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.akz.cinema.ui.util.slideInOrStandardEnter
 import com.akz.cinema.ui.util.slideInOrStandardPopEnter
 import com.akz.cinema.ui.util.slideOutOrStandardExit
