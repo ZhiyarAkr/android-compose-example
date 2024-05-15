@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import com.akz.cinema.R
+import com.akz.cinema.ui.screen.home.HomeScreenRoute
 import com.akz.cinema.ui.screen.home.isHomeScreen
 import com.akz.cinema.ui.screen.home.navigateToHomeScreen
 import com.akz.cinema.ui.screen.saved.isSavedCurrentDestination
@@ -29,7 +30,7 @@ enum class NavigationItem(
         navOptions = NavOptions.Builder()
             .setRestoreState(true)
             .setLaunchSingleTop(true)
-            .setPopUpTo("home_screen", false)
+            .setPopUpTo(HomeScreenRoute, false)
             .build()
     ),
     Search(
@@ -40,7 +41,7 @@ enum class NavigationItem(
         navigateTo = NavController::navigateToSearchScreen,
         navOptions = NavOptions.Builder()
             .setRestoreState(true)
-            .setPopUpTo("home_screen", false)
+            .setPopUpTo(HomeScreenRoute, false)
             .build()
     ),
     Saved(
@@ -51,7 +52,7 @@ enum class NavigationItem(
         navigateTo = NavController::navigateToSavedScreen,
         navOptions = NavOptions.Builder()
             .setRestoreState(true)
-            .setPopUpTo("home_screen", false)
+            .setPopUpTo(HomeScreenRoute, false)
             .build()
     )
 }

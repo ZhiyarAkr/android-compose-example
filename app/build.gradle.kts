@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    kotlin("plugin.serialization") version "1.9.24"
 }
 
 android {
@@ -54,7 +55,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.12"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     packaging {
         resources {
@@ -82,20 +83,20 @@ ksp {
 
 dependencies {
 
-    val navVersion = "2.8.0-alpha08"
-    val lifecycleVersion = "2.7.0"
-    val material3Version = "1.3.0-alpha06"
+    val navVersion = "2.8.0-beta01"
+    val lifecycleVersion = "2.8.0"
+    val material3Version = "1.3.0-beta01"
     val roomVersion = "2.6.1"
-    val pagingVersion = "3.2.1"
+    val pagingVersion = "3.3.0"
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.23"))
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation(platform("androidx.compose:compose-bom:2024.05.00"))
-    implementation("androidx.compose.animation:animation:1.7.0-alpha08")
-    implementation("androidx.compose.animation:animation-core:1.7.0-alpha08")
-    implementation("androidx.compose.ui:ui:1.7.0-alpha08")
+    implementation("androidx.compose.animation:animation:1.7.0-beta01")
+    implementation("androidx.compose.animation:animation-core:1.7.0-beta01")
+    implementation("androidx.compose.ui:ui:1.7.0-beta01")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     testImplementation("junit:junit:4.13.2")
@@ -172,4 +173,7 @@ dependencies {
 
     //splashscreen
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    //serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }

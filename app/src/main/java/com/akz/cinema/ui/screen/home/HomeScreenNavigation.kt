@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
@@ -11,14 +12,15 @@ import com.akz.cinema.ui.util.slideInOrStandardEnter
 import com.akz.cinema.ui.util.slideInOrStandardPopEnter
 import com.akz.cinema.ui.util.slideOutOrStandardExit
 import com.akz.cinema.ui.util.slideOutOrStandardPopExit
+import kotlinx.serialization.Serializable
 
-const val HOME_SCREEN_ROUTE = "home_screen"
+@Serializable
+object HomeScreenRoute
 
 fun NavGraphBuilder.homeScreenNavGraph(
     onDetailPressed: (Int) -> Unit,
 ) {
-    composable(
-        route = HOME_SCREEN_ROUTE,
+    composable<HomeScreenRoute>(
         exitTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideOutOrStandardExit,
         enterTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideInOrStandardEnter,
         popEnterTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideInOrStandardPopEnter,
@@ -30,9 +32,9 @@ fun NavGraphBuilder.homeScreenNavGraph(
     }
 }
 
-fun NavController.navigateToHomeScreen(navOptions: NavOptions? = null) {
-    navigate(route = HOME_SCREEN_ROUTE, navOptions = navOptions)
-}
+fun NavController.navigateToHomeScreen(navOptions: NavOptions? = null) =
+    navigate(route = HomeScreenRoute, navOptions = navOptions)
 
-fun NavDestination.isHomeScreen() = route == HOME_SCREEN_ROUTE
+
+fun NavDestination.isHomeScreen() = hasRoute(HomeScreenRoute::class)
 

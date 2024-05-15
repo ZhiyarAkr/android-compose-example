@@ -1,11 +1,12 @@
 package com.akz.cinema.ui.screen.detail
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.akz.cinema.data.detail.MovieDetail
 import com.akz.cinema.data.detail.MovieDetailRepository
 import com.akz.cinema.data.movie.MovieRepository
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class DetailScreenViewModel @Inject constructor(
     private val movieDetailRepository: MovieDetailRepository,
-    private val movieRepository: MovieRepository
+    private val movieRepository: MovieRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _movieDetail: MutableStateFlow<MovieDetail?> = MutableStateFlow(null)
     val movieDetail = _movieDetail.asStateFlow()
@@ -40,6 +42,11 @@ class DetailScreenViewModel @Inject constructor(
 
             DetailEvent.EnqueueLocalStorageWorkers -> enqueueLocalStorageWorkers()
         }
+    }
+
+    init {
+        val movieId = savedStateHandle.toRoute<DetailScreenRoute>().movieId
+        getMovieDetail(movieId)
     }
 
     private fun getMovieDetail(movieId: Int) {

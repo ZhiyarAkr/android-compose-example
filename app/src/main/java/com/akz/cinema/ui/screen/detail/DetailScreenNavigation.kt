@@ -7,46 +7,35 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.akz.cinema.ui.util.slideInOrStandardEnter
 import com.akz.cinema.ui.util.slideInOrStandardPopEnter
 import com.akz.cinema.ui.util.slideOutOrStandardExit
 import com.akz.cinema.ui.util.slideOutOrStandardPopExit
+import kotlinx.serialization.Serializable
 
-const val DETAIL_SCREEN_ROUTE = "detail_screen/{movieId}?transition={transition}"
+@Serializable
+data class DetailScreenRoute(
+    val movieId: Int,
+    val transition: Int
+)
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.detailScreenNavGraph(
     onBackPressed: () -> Unit,
     sharedTransitionScope: SharedTransitionScope
 ) {
-    composable(
-        route = DETAIL_SCREEN_ROUTE,
-        arguments = listOf(
-            navArgument(
-                name = "movieId"
-            ) {
-                type = NavType.IntType
-            },
-            navArgument(
-                name = "transition"
-            ) {
-                type = NavType.IntType
-                defaultValue = 0
-            }
-        ),
+    composable<DetailScreenRoute>(
         exitTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideOutOrStandardExit,
         enterTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideInOrStandardEnter,
         popEnterTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideInOrStandardPopEnter,
         popExitTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideOutOrStandardPopExit,
     ) {
-        val movieId = it.arguments?.getInt("movieId")
         DetailScreen(
-            movieId = movieId,
             onBackPressed = onBackPressed,
             sharedTransitionScope = sharedTransitionScope,
             animatedContentScope = this
@@ -58,17 +47,6 @@ fun NavController.navigateToDetailScreen(
     movieId: Int,
     transition: Int = 1,
     navOptions: NavOptions? = null
-) {
-    navigate(
-        route = DETAIL_SCREEN_ROUTE.replace(
-            "{movieId}",
-            "$movieId"
-        ).replace(
-            "{transition}",
-            "$transition"
-        ),
-        navOptions = navOptions
-    )
-}
+) = navigate(DetailScreenRoute(movieId, transition), navOptions)
 
-fun NavDestination.isDetailScreen() = route == DETAIL_SCREEN_ROUTE
+fun NavDestination.isDetailScreen() = hasRoute(DetailScreenRoute::class)

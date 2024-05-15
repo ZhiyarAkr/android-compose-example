@@ -3,11 +3,8 @@ package com.akz.cinema.ui.screen.detail
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -22,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -45,9 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -70,7 +64,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun DetailScreen(
     viewModel: DetailScreenViewModel = hiltViewModel(),
-    movieId: Int?,
     onBackPressed: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope
@@ -80,7 +73,6 @@ fun DetailScreen(
     val scope = rememberCoroutineScope()
     val paddingValues = LocalPaddings.current
     val context = LocalContext.current
-    val density = LocalDensity.current
     var canGoBack by LocalCanGoBack.current
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
 
@@ -108,18 +100,8 @@ fun DetailScreen(
         topPadding = maxOf(topPadding, paddingValues.calculateTopPadding())
     }
 
-    LaunchedEffect(Unit) {
-        movieId?.let {
-            viewModel.onEvent(DetailEvent.GetDetail(it))
-        }
-    }
-
     LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
         viewModel.onEvent(DetailEvent.EnqueueLocalStorageWorkers)
-    }
-
-    val imageEnterAnimation = remember {
-        Animatable(with(density) { 64.dp.roundToPx() }, Int.VectorConverter)
     }
 
     Box(
@@ -154,28 +136,10 @@ fun DetailScreen(
                             .placeholderMemoryCacheKey("image_${it.id}")
                             .build(),
                         contentDescription = null,
-                        onSuccess = {
-                            scope.launch {
-                                imageEnterAnimation.animateTo(
-                                    targetValue = 0,
-                                    animationSpec = tween(
-                                        delayMillis = 300,
-                                        durationMillis = 100,
-                                        easing = androidx.compose.animation.core.EaseInExpo
-                                    )
-                                )
-                            }
-                        },
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
-                            .offset {
-                                IntOffset(
-                                    x = imageEnterAnimation.value,
-                                    y = 0
-                                )
-                            }
                             .sharedElement(
                                 rememberSharedContentState(key = "image_${it.id}"),
                                 animatedContentScope,

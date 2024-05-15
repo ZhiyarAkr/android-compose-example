@@ -32,7 +32,7 @@ import com.akz.cinema.ui.components.AppBottomBar
 import com.akz.cinema.ui.components.CinemaTopAppBar
 import com.akz.cinema.ui.screen.detail.detailScreenNavGraph
 import com.akz.cinema.ui.screen.detail.navigateToDetailScreen
-import com.akz.cinema.ui.screen.home.HOME_SCREEN_ROUTE
+import com.akz.cinema.ui.screen.home.HomeScreenRoute
 import com.akz.cinema.ui.screen.home.homeScreenNavGraph
 import com.akz.cinema.ui.screen.saved.savedScreenGraph
 import com.akz.cinema.ui.screen.search.searchScreenNavGraph
@@ -118,7 +118,7 @@ fun AppNavigation(
             ) {
                 NavHost(
                     navController = navController,
-                    startDestination = HOME_SCREEN_ROUTE
+                    startDestination = HomeScreenRoute
                 ) {
                     homeScreenNavGraph(
                         onDetailPressed = { movieId ->
