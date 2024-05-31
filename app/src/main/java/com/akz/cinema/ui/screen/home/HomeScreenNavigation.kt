@@ -1,6 +1,8 @@
 package com.akz.cinema.ui.screen.home
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -17,8 +19,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 object HomeScreenRoute
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.homeScreenNavGraph(
     onDetailPressed: (Int) -> Unit,
+    sharedTransitionScope: SharedTransitionScope
 ) {
     composable<HomeScreenRoute>(
         exitTransition = AnimatedContentTransitionScope<NavBackStackEntry>::slideOutOrStandardExit,
@@ -28,6 +32,8 @@ fun NavGraphBuilder.homeScreenNavGraph(
     ) {
         HomeScreen(
             onDetailPressed = onDetailPressed,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = this
         )
     }
 }

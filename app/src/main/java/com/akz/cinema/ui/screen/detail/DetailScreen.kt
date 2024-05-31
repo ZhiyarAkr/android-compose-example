@@ -5,9 +5,11 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -75,6 +79,44 @@ fun DetailScreen(
     val context = LocalContext.current
     var canGoBack by LocalCanGoBack.current
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+    val paletteOutput by viewModel.dominantSwatch.collectAsStateWithLifecycle()
+
+    val secondBgColorOpacity by remember(scrollState.maxValue) {
+        val div = if (scrollState.maxValue > 0) scrollState.maxValue else Float.MAX_VALUE
+        derivedStateOf {
+            1 - scrollState.value.toFloat() / div.toFloat()
+        }
+    }
+    val color = MaterialTheme.colorScheme.background
+
+    val paletteColorAnimated by animateColorAsState(
+        targetValue = paletteOutput ?: color,
+        label = "palette_color_animation",
+        animationSpec = tween(
+            durationMillis = 500
+        )
+    )
+
+    LaunchedEffect(movie) {
+        viewModel.makePaletteFromMovieIndex(context)
+    }
+
+    val mainScreenModifier = if (isSystemInDarkTheme()) {
+        Modifier
+            .drawBehind {
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0f to paletteColorAnimated.copy(alpha = secondBgColorOpacity),
+                            0.8f to color
+                        )
+                    )
+                )
+            }
+    } else {
+        Modifier
+    }
+
 
     val showScrollIcon by remember {
         derivedStateOf {
@@ -105,7 +147,7 @@ fun DetailScreen(
     }
 
     Box(
-        modifier = Modifier
+        modifier = mainScreenModifier
             .fillMaxSize()
             .padding(top = topPadding)
             .navigationBarsPadding(),
@@ -120,11 +162,12 @@ fun DetailScreen(
         ) {
             movie?.let {
                 with(sharedTransitionScope) {
+                    val sharedElementString = "image_${it.id}"
                     AsyncImage(
                         model = if (it.isSavedInLocal) ImageRequest.Builder(context)
                             .data(getUriForLocalDetailImage(it.backdropPath, context))
-                            .memoryCacheKey("image_${it.id}")
-                            .placeholderMemoryCacheKey("image_${it.id}")
+                            .memoryCacheKey(sharedElementString)
+                            .placeholderMemoryCacheKey(sharedElementString)
                             .build() else ImageRequest.Builder(context)
                             .data(
                                 getUriForRemoteImage(
@@ -132,8 +175,8 @@ fun DetailScreen(
                                     RemoteImageSize.ImageSizeW780
                                 )
                             )
-                            .memoryCacheKey("image_${it.id}")
-                            .placeholderMemoryCacheKey("image_${it.id}")
+                            .memoryCacheKey(sharedElementString)
+                            .placeholderMemoryCacheKey(sharedElementString)
                             .build(),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
@@ -141,7 +184,7 @@ fun DetailScreen(
                             .fillMaxWidth()
                             .height(200.dp)
                             .sharedElement(
-                                rememberSharedContentState(key = "image_${it.id}"),
+                                rememberSharedContentState(key = sharedElementString),
                                 animatedContentScope,
 //                                enter = EnterTransition.None,
 //                                exit = fadeOut(),
@@ -225,7 +268,7 @@ fun DetailScreen(
         ) {
             IconButton(
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Black.copy( alpha = 0.3f)
+                    containerColor = Color.Black.copy(alpha = 0.3f)
                 ),
                 onClick = {
                     scope.launch {

@@ -122,8 +122,11 @@ fun AppNavigation(
                 ) {
                     homeScreenNavGraph(
                         onDetailPressed = { movieId ->
-                            navController.navigateToDetailScreen(movieId)
-                        }
+                            navController.navigateToDetailScreen(
+                                movieId
+                            )
+                        },
+                        sharedTransitionScope = this@SharedTransitionLayout
                     )
                     detailScreenNavGraph(
                         onBackPressed = navController::popBackStack,

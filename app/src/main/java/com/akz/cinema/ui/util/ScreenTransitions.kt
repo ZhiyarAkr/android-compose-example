@@ -10,58 +10,63 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.toRoute
+import com.akz.cinema.ui.screen.detail.DetailScreenRoute
+import com.akz.cinema.ui.screen.detail.isDetailScreen
 
 fun AnimatedContentTransitionScope<NavBackStackEntry>.slideInOrStandardEnter(): EnterTransition {
-    val transition = targetState.arguments?.getInt("transition")
-    transition?.let {
-        if (it == 1) {
+    if (targetState.destination.isDetailScreen()) {
+        val transition = targetState.toRoute<DetailScreenRoute>().transition
+        if (transition == 1) {
             return slideInHorizontally(
-                initialOffsetX = {offset ->
+                initialOffsetX = { offset ->
                     offset
                 }
             ) + fadeIn()
-        } else {
-            null
         }
-    } ?: return scaleIn(initialScale = 0.8f) + fadeIn()
+    }
+    return scaleIn(initialScale = 0.8f) + fadeIn()
 }
 
+
 fun AnimatedContentTransitionScope<NavBackStackEntry>.slideInOrStandardPopEnter(): EnterTransition {
-    val transition = initialState.arguments?.getInt("transition")
-    transition?.let {
-        if (it == 1) {
+    if (initialState.destination.isDetailScreen()) {
+        val transition = initialState.toRoute<DetailScreenRoute>().transition
+        if (transition == 1) {
             return slideInHorizontally(
-                initialOffsetX = {offset ->
+                initialOffsetX = { offset ->
                     -offset
                 }
             ) + fadeIn()
-        } else {
-            null
         }
-    } ?: return scaleIn(initialScale = 0.8f) + fadeIn()
+    }
+    return scaleIn(initialScale = 0.8f) + fadeIn()
 }
+
 fun AnimatedContentTransitionScope<NavBackStackEntry>.slideOutOrStandardExit(): ExitTransition {
-    val transition = targetState.arguments?.getInt("transition")
-    transition?.let {
-        if (it == 1) {
+    if (targetState.destination.isDetailScreen()) {
+        val transition = targetState.toRoute<DetailScreenRoute>().transition
+        if (transition == 1) {
             return slideOutHorizontally(
-                targetOffsetX = {offset ->
+                targetOffsetX = { offset ->
                     -offset
                 }
             ) + fadeOut()
-        } else null
-    } ?: return scaleOut(targetScale = 0.8f) + fadeOut()
+        }
+    }
+    return scaleOut(targetScale = 0.8f) + fadeOut()
 }
 
 fun AnimatedContentTransitionScope<NavBackStackEntry>.slideOutOrStandardPopExit(): ExitTransition {
-    val transition = initialState.arguments?.getInt("transition")
-    transition?.let {
-        if (it == 1) {
+    if (initialState.destination.isDetailScreen()) {
+        val transition = initialState.toRoute<DetailScreenRoute>().transition
+        if (transition == 1) {
             return slideOutHorizontally(
-                targetOffsetX = {offset ->
+                targetOffsetX = { offset ->
                     offset
                 }
             ) + fadeOut()
-        } else null
-    } ?: return scaleOut(targetScale = 0.8f) + fadeOut()
+        }
+    }
+    return scaleOut(targetScale = 0.8f) + fadeOut()
 }

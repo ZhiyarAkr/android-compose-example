@@ -1,8 +1,8 @@
 package com.akz.cinema.ui.screen.home
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +18,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,8 +30,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -42,20 +43,21 @@ import androidx.lifecycle.compose.currentStateAsState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.ui.components.LazyMoviesHorizontalScroll
-import com.akz.cinema.ui.screen.home.carousel.HeroCarousel
+import com.akz.cinema.ui.screen.home.carousel.HeroCarouselCompose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel(),
-    onDetailPressed: (Int) -> Unit
+    onDetailPressed: (Int) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope
 ) {
     val moviesOfWeek by viewModel.moviesOfWeek.collectAsStateWithLifecycle()
     val moviesOfDay by viewModel.moviesOfDay.collectAsStateWithLifecycle()
-    val paletteOutput by viewModel.dominantSwatch.collectAsStateWithLifecycle()
     val moviesStream = viewModel.nowPlayingMoviesStream.collectAsLazyPagingItems()
     val paddingValues = LocalPaddings.current
     val scrollState = rememberScrollState()
@@ -74,45 +76,17 @@ fun HomeScreen(
 
     val pullToRefreshState = rememberPullToRefreshState()
 
-    val secondBgColorOpacity by remember(scrollState.maxValue) {
-        val div = if (scrollState.maxValue > 0) scrollState.maxValue else Float.MAX_VALUE
-        derivedStateOf {
-            1 - scrollState.value.toFloat() / div.toFloat()
-        }
-    }
-    val color = MaterialTheme.colorScheme.background
-
-    val paletteColorAnimated by animateColorAsState(
-        targetValue = paletteOutput ?: color,
-        label = "palette_color_animation",
-        animationSpec = tween(
-            durationMillis = 500
-        )
-    )
 
 
-    val mainScreenModifier = if (isSystemInDarkTheme()) {
-        Modifier
-            .drawBehind {
-                drawRect(
-                    brush = Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0f to paletteColorAnimated.copy(alpha = secondBgColorOpacity),
-                            0.8f to color
-                        )
-                    )
-                )
-            }
-    } else {
-        Modifier
-    }
+
+
 
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
 
     Box(
-        modifier = mainScreenModifier
+        modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding(),
         contentAlignment = Alignment.Center
@@ -120,7 +94,8 @@ fun HomeScreen(
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             state = pullToRefreshState,
-            onRefresh = { isRefreshing = true
+            onRefresh = {
+                isRefreshing = true
                 scope.launch {
                     viewModel.onEvent(HomeEvent.RefreshMovies)
                     moviesStream.refresh()
@@ -133,43 +108,61 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(state = scrollState),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                HeroCarousel(
-                    modifier = Modifier.padding(top = 32.dp),
-                    movies = moviesOfDay,
-                    onClick = onDetailPressed,
-                    onPositionChange = viewModel::makePaletteFromMovieIndex
-                )
-//            HorizontalMultiBrowseCarousel(
-//                modifier = Modifier
-//                    .width(412.dp)
-//                    .height(221.dp),
-//                state = rememberCarouselState {
-//                    moviesOfDay.size
-//                },
-//                itemSpacing = 8.dp,
-//                preferredItemWidth = 186.dp
-//            ) {
-//                Card(
-//                    modifier = Modifier.height(205.dp)
-//                ) {
-//                    AsyncImage(
-//                        modifier = Modifier.fillMaxSize(),
-//                        model = getUriForRemoteImage(
-//                            moviesOfDay[it].backdropPath,
-//                            RemoteImageSize.ImageSizeW780
-//                        ),
-//                        contentDescription = null,
-//                        contentScale = ContentScale.Crop
-//                    )
-//                }
-//            }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .drawWithCache {
+                            val path = Path()
+                            val xFromLeft = 32.dp.toPx()
+                            val slope = 12.dp.toPx()
+                            val hSlope = size.height - slope
+                            val xFromLeft2 = xFromLeft + slope
+                            val xFromRight = size.width - xFromLeft
+                            val xFromRight2 = xFromRight - slope
+
+                            path.moveTo(0f, 0f)
+                            path.lineTo(xFromLeft, 0f)
+                            path.relativeLineTo(slope, slope)
+                            path.lineTo(xFromRight2, slope)
+                            path.relativeLineTo(slope, -slope)
+                            path.lineTo(size.width, 0f)
+                            path.lineTo(size.width, size.height)
+                            path.lineTo(xFromRight, size.height)
+                            path.relativeLineTo(-slope, -slope)
+                            path.lineTo(xFromLeft2, hSlope)
+                            path.relativeLineTo(-slope, slope)
+                            path.lineTo(0f, size.height)
+                            path.close()
+                            onDrawBehind {
+                                drawPath(path, color = Color.Red.copy(green = 0.5f))
+                            }
+                        }
+                        .padding(vertical = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Top movies of the day",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier
+                            .padding(start = 16.dp),
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                    HeroCarouselCompose(
+                        movies = moviesOfDay,
+                        preferredItemWidth = 400.dp,
+                        state = rememberCarouselState { if (moviesOfDay.isNotEmpty()) moviesOfDay.size else 10 },
+                        onClick = onDetailPressed,
+                    )
+                }
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 32.dp),
+                        .padding(top = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
@@ -177,9 +170,14 @@ fun HomeScreen(
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(start = 16.dp)
                     )
-                    LazyMoviesHorizontalScroll(
+                    HeroCarouselCompose(
+                        state = rememberCarouselState {
+                            if (moviesOfWeek.isNotEmpty()) moviesOfWeek.size else 10
+                        },
+                        preferredItemWidth = 200.dp,
+                        titleStyle = MaterialTheme.typography.bodySmall,
                         movies = moviesOfWeek,
-                        onClick = onDetailPressed
+                        onClick = onDetailPressed,
                     )
                 }
 

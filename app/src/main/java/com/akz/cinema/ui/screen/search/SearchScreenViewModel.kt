@@ -33,7 +33,7 @@ class SearchScreenViewModel @Inject constructor(
     private val _searchResults = MutableStateFlow<List<Movie>>(emptyList())
     val searchResults = _searchResults.asStateFlow()
 
-    private val recentSearchResults = movieRepository.observeLocalStoredRecentMovies().stateIn(
+    val recentSearchResults = movieRepository.observeLocalStoredRecentMovies().stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
         emptyList()
@@ -78,10 +78,13 @@ class SearchScreenViewModel @Inject constructor(
                 }
             } else {
                 isHistoryBeingServed = true
-                _searchResults.update {
-                    recentSearchResults.value
-                }
             }
+        }
+    }
+
+    fun deleteRecentMovie(movie: Movie) {
+        viewModelScope.launch {
+            movieRepository.deleteOneRecentMovieById(movie.id)
         }
     }
 

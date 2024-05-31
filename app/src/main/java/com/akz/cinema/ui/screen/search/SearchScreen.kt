@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -46,7 +48,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.akz.cinema.LocalHideNavBar
 import com.akz.cinema.LocalPaddings
+import com.akz.cinema.data.movie.Movie
 import com.akz.cinema.ui.components.Skeleton
+import com.akz.cinema.ui.components.SwipeToReveal
+import com.akz.cinema.ui.components.rememberSwipeToRevealState
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +66,7 @@ fun SearchScreen(
             .padding(bottom = LocalPaddings.current.calculateBottomPadding())
     ) {
         val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+        val recentSearchResults by viewModel.recentSearchResults.collectAsStateWithLifecycle()
         val recentCount by viewModel.recentMoviesCount.collectAsStateWithLifecycle()
         val keyboardController = LocalSoftwareKeyboardController.current
         var hideNavbar by LocalHideNavBar.current
@@ -130,9 +136,6 @@ fun SearchScreen(
             modifier = Modifier.align(Alignment.TopCenter),
             windowInsets = SearchBarDefaults.windowInsets,
             content = {
-                val listItemModifier = Modifier
-                    .fillMaxWidth()
-                    .height(128.dp)
                 AnimatedVisibility(
                     visible = viewModel.isHistoryBeingServed,
                     enter = fadeIn(
@@ -168,48 +171,144 @@ fun SearchScreen(
                         .fillMaxSize()
                         .navigationBarsPadding(),
                 ) {
-                    items(items = searchResults) { movie ->
-                        ListItem(
-                            modifier = listItemModifier.clickable {
+                    if (viewModel.isHistoryBeingServed) {
+                        items(items = recentSearchResults) { movie ->
+                            RecentItem(modifier = Modifier.animateItem(), movie = movie, onClick = {
+                                onDetailPressed(movie.id)
+                            }, onDelete = {
+                                viewModel.deleteRecentMovie(movie)
+                            })
+                        }
+                    } else {
+                        items(items = searchResults) { movie ->
+                            SearchItem(movie = movie, onClick = {
                                 viewModel.onEvent(SearchEvent.SaveToRecent(movie, context))
                                 onDetailPressed(movie.id)
-                            },
-                            headlineContent = {
-                                Text(
-                                    text = movie.title,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            leadingContent = {
-                                movie.backdropPath?.let { backDrop ->
-                                    val path =
-                                        if (movie.isImagePathAbsolute) backDrop else "https://image.tmdb.org/t/p/w500/$backDrop"
-                                    AsyncImage(
-                                        model = path,
-                                        contentDescription = "Movie Photo",
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .width(150.dp)
-                                            .fillMaxHeight()
-                                            .clip(RoundedCornerShape(8.dp))
-                                    )
-                                } ?: Skeleton(
-                                    modifier = Modifier
-                                        .width(150.dp)
-                                        .height(100.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                )
-                            },
-                            supportingContent = {
-                                Text(
-                                    text = movie.overview,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        )
+                            })
+                        }
                     }
+
                 }
             },
         )
     }
+}
+
+@Composable
+private fun RecentItem(
+    modifier: Modifier = Modifier,
+    movie: Movie,
+    onClick: (Movie) -> Unit,
+    onDelete: (Movie) -> Unit
+) {
+    val state = rememberSwipeToRevealState(threshHold = 0.3f)
+    SwipeToReveal(
+        modifier = modifier,
+        state = state,
+        onBackgroundEndPressed = { onClick(movie) },
+        backgroundEnd = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .clickable {
+                        onDelete(movie)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        },
+        foreground = {
+            ListItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(128.dp)
+                    .clickable {
+                        onClick(movie)
+                    },
+                headlineContent = {
+                    Text(
+                        text = movie.title,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                leadingContent = {
+                    movie.backdropPath?.let { backDrop ->
+                        val path =
+                            if (movie.isImagePathAbsolute) backDrop else "https://image.tmdb.org/t/p/w500/$backDrop"
+                        AsyncImage(
+                            model = path,
+                            contentDescription = "Movie Photo",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .width(150.dp)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                    } ?: Skeleton(
+                        modifier = Modifier
+                            .width(150.dp)
+                            .height(100.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                },
+                supportingContent = {
+                    Text(
+                        text = movie.overview,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            )
+        })
+}
+
+@Composable
+private fun SearchItem(modifier: Modifier = Modifier, onClick: (Movie) -> Unit, movie: Movie) {
+    ListItem(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(128.dp)
+            .clickable {
+                onClick(movie)
+            },
+        headlineContent = {
+            Text(
+                text = movie.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        leadingContent = {
+            movie.backdropPath?.let { backDrop ->
+                val path =
+                    if (movie.isImagePathAbsolute) backDrop else "https://image.tmdb.org/t/p/w500/$backDrop"
+                AsyncImage(
+                    model = path,
+                    contentDescription = "Movie Photo",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .width(150.dp)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            } ?: Skeleton(
+                modifier = Modifier
+                    .width(150.dp)
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+        },
+        supportingContent = {
+            Text(
+                text = movie.overview,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    )
 }

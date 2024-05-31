@@ -11,13 +11,9 @@ import androidx.paging.cachedIn
 import com.akz.cinema.data.movie.Movie
 import com.akz.cinema.data.movie.MovieRepository
 import com.akz.cinema.util.PaletteManager
-import com.akz.cinema.util.RemoteImageSize
-import com.akz.cinema.util.getUriForRemoteImage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,12 +37,6 @@ class HomeScreenViewModel @Inject constructor(
     private val _moviesOfWeek: MutableStateFlow<List<Movie>> = MutableStateFlow(emptyList())
     val moviesOfWeek = _moviesOfWeek.asStateFlow()
 
-    val dominantSwatch = paletteManager.dominantSwatch.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        null
-    )
-
     val nowPlayingMoviesStream = movieRepository.getNowPlayingMoviesStream()
         .cachedIn(viewModelScope)
 
@@ -68,23 +58,6 @@ class HomeScreenViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }
-    }
-
-
-    fun makePaletteFromMovieIndex(index: Int) {
-        if (moviesOfDay.value.isNotEmpty()) {
-            val uri = getUriForRemoteImage(
-                moviesOfDay.value[index].backdropPath,
-                RemoteImageSize.ImageSizeW780
-            )
-            if (uri != null) refreshPaletteFromUri(uri, 0.3f)
-        }
-    }
-
-    private fun refreshPaletteFromUri(uri: String, lighting: Float) {
-        viewModelScope.launch {
-            paletteManager.makePaletteFromUri(uri, lighting)
         }
     }
 

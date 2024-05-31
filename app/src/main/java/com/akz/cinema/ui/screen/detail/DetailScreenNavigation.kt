@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DetailScreenRoute(
     val movieId: Int,
-    val transition: Int
+    val transition: Int,
 )
 
 @OptIn(ExperimentalSharedTransitionApi::class)
