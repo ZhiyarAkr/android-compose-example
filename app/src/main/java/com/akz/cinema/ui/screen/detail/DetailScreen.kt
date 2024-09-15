@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,10 +21,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -33,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -42,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +61,7 @@ import coil.request.ImageRequest
 import com.akz.cinema.LocalCanGoBack
 import com.akz.cinema.LocalPaddings
 import com.akz.cinema.R
+import com.akz.cinema.ui.theme.mainColor
 import com.akz.cinema.util.RemoteImageSize
 import com.akz.cinema.util.formatCurrency
 import com.akz.cinema.util.getUriForLocalDetailImage
@@ -75,18 +79,11 @@ fun DetailScreen(
     val movie by viewModel.movieDetail.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
-    val paddingValues = LocalPaddings.current
     val context = LocalContext.current
     var canGoBack by LocalCanGoBack.current
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val paletteOutput by viewModel.dominantSwatch.collectAsStateWithLifecycle()
 
-    val secondBgColorOpacity by remember(scrollState.maxValue) {
-        val div = if (scrollState.maxValue > 0) scrollState.maxValue else Float.MAX_VALUE
-        derivedStateOf {
-            1 - scrollState.value.toFloat() / div.toFloat()
-        }
-    }
     val color = MaterialTheme.colorScheme.background
 
     val paletteColorAnimated by animateColorAsState(
@@ -107,7 +104,7 @@ fun DetailScreen(
                 drawRect(
                     brush = Brush.verticalGradient(
                         colorStops = arrayOf(
-                            0f to paletteColorAnimated.copy(alpha = secondBgColorOpacity),
+                            0f to paletteColorAnimated,
                             0.8f to color
                         )
                     )
@@ -124,9 +121,6 @@ fun DetailScreen(
         }
     }
 
-    var topPadding by remember {
-        mutableStateOf(0.dp)
-    }
 
     BackHandler(enabled = !lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) {
 
@@ -138,10 +132,6 @@ fun DetailScreen(
         }
     }
 
-    LaunchedEffect(paddingValues) {
-        topPadding = maxOf(topPadding, paddingValues.calculateTopPadding())
-    }
-
     LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
         viewModel.onEvent(DetailEvent.EnqueueLocalStorageWorkers)
     }
@@ -149,8 +139,7 @@ fun DetailScreen(
     Box(
         modifier = mainScreenModifier
             .fillMaxSize()
-            .padding(top = topPadding)
-            .navigationBarsPadding(),
+            .systemBarsPadding(),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -226,11 +215,7 @@ fun DetailScreen(
                                 R.drawable.baseline_bookmark_border_24
                             ),
                             contentDescription = "Bookmark",
-                            tint = Color(
-                                red = 1f,
-                                green = 0.5f,
-                                blue = 0f
-                            )
+                            tint = mainColor
                         )
                     }
                 }
@@ -280,12 +265,35 @@ fun DetailScreen(
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.baseline_keyboard_double_arrow_down_24),
-                    tint = Color.Yellow.copy(
-                        green = 0.5f
-                    ),
+                    tint = mainColor,
                     contentDescription = "Can be Scrolled"
                 )
             }
+        }
+        val backButtonAlpha = remember {
+            Animatable(0f)
+        }
+        IconButton(
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.TopStart)
+                .graphicsLayer {
+                    alpha = backButtonAlpha.value
+                },
+            enabled = canGoBack,
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = Color.Black.copy(alpha = 0.3f)
+            ),
+            onClick = onBackPressed
+        ) {
+            LaunchedEffect(Unit) {
+                backButtonAlpha.animateTo(1f, animationSpec = tween(delayMillis = 300, durationMillis = 300))
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                tint = Color.White,
+                contentDescription = "Back Button"
+            )
         }
     }
 }

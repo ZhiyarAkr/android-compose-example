@@ -1,10 +1,14 @@
 package com.akz.cinema.ui.screen.home.carousel
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -20,6 +24,7 @@ import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -62,6 +67,35 @@ fun HeroCarouselCompose(
         )
     }
 }
+
+//@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+//@Composable
+//fun HeroCarouselCompose(
+//    modifier: Modifier = Modifier,
+//    state: CarouselState,
+//    preferredItemWidth: Dp,
+//    titleStyle: TextStyle = MaterialTheme.typography.titleSmall,
+//    movies: List<Movie>,
+//    onClick: (Int) -> Unit,
+//    sharedTransitionScope: SharedTransitionScope,
+//    animatedContentScope: AnimatedContentScope
+//) {
+//    HeroHorizontalCarousel(
+//        modifier = modifier,
+//        state = state,
+//        preferredItemWidth = preferredItemWidth
+//    ) {
+//        HeroCarouselItem(
+//            modifier = Modifier.fillMaxSize(),
+//            movies = movies,
+//            onClick = onClick,
+//            titleStyle = titleStyle,
+//            index = it,
+//            sharedTransitionScope = sharedTransitionScope,
+//            animatedContentScope = animatedContentScope
+//        )
+//    }
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,3 +186,77 @@ private fun CarouselItemScope.HeroCarouselItem(
         }
     }
 }
+
+//very buggy
+//@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+//@Composable
+//private fun CarouselItemScope.HeroCarouselItem(
+//    modifier: Modifier = Modifier,
+//    movies: List<Movie>,
+//    onClick: (Int) -> Unit,
+//    titleStyle: TextStyle = MaterialTheme.typography.titleSmall,
+//    index: Int,
+//    sharedTransitionScope: SharedTransitionScope,
+//    animatedContentScope: AnimatedContentScope
+//) {
+//    val context = LocalContext.current
+//    if (movies.isNotEmpty()) {
+//        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.BottomStart) {
+//            val sharedElementString = "image_${movies[index].id}"
+//            with(sharedTransitionScope) {
+//                AsyncImage(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(205.dp)
+//                        .clickable { onClick(movies[index].id) }
+//                        .sharedElement(
+//                            state = rememberSharedContentState(key = sharedElementString),
+//                            animatedVisibilityScope = animatedContentScope
+//                        )
+//                        .maskClip(shape = RoundedCornerShape(32.dp)),
+//                    model = ImageRequest.Builder(context)
+//                        .data(
+//                            getUriForRemoteImage(
+//                                movies[index].backdropPath,
+//                                RemoteImageSize.ImageSizeW780
+//                            )
+//                        )
+//                        .memoryCacheKey(sharedElementString)
+//                        .placeholderMemoryCacheKey(sharedElementString)
+//                        .build(),
+//                    contentDescription = null,
+//                    contentScale = ContentScale.Crop
+//                )
+//            }
+//            Text(
+//                text = movies[index].title,
+//                style = titleStyle,
+//                modifier = Modifier
+//                    .offset {
+//                        IntOffset(
+//                            x = this@HeroCarouselItem.carouselItemInfo.maskRect.left.roundToInt(),
+//                            y = 0
+//                        )
+//                    }
+//                    .graphicsLayer {
+//                        alpha = lerp(
+//                            1f,
+//                            0f,
+//                            this@HeroCarouselItem.carouselItemInfo.maskRect.left / 80f
+//                        )
+//                    }
+//                    .padding(start = 16.dp, bottom = 16.dp)
+//                    .background(
+//                        Color.Black.copy(alpha = 0.5f),
+//                        shape = RoundedCornerShape(100)
+//                    )
+//                    .padding(8.dp),
+//                color = Color.White
+//            )
+//        }
+//    } else {
+//        Skeleton(
+//            modifier = Modifier.fillMaxSize().clip(shape = RoundedCornerShape(32.dp))
+//        )
+//    }
+//}

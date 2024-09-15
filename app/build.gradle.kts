@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.akz.cinema"
-    compileSdk = 34
+    compileSdk = 35
 
     val accessToken: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_AUTH_TOKEN") as String
 
@@ -18,7 +18,7 @@ android {
     defaultConfig {
         applicationId = "com.akz.cinema"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 2
         versionName = "1.1"
 
@@ -81,26 +81,26 @@ ksp {
 
 dependencies {
 
-    val navVersion = "2.8.0-beta02"
-    val lifecycleVersion = "2.8.1"
-    val material3Version = "1.3.0-beta02"
+    val navVersion = "2.8.0-beta07"
+    val lifecycleVersion = "2.8.4"
+    val material3Version = "1.3.0-beta05"
     val roomVersion = "2.6.1"
-    val pagingVersion = "3.3.0"
+    val pagingVersion = "3.3.2"
 
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.0.0"))
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.1")
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
-    implementation("androidx.compose.animation:animation:1.7.0-beta02")
-    implementation("androidx.compose.animation:animation-core:1.7.0-beta02")
-    implementation("androidx.compose.ui:ui:1.7.0-beta02")
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.0.10"))
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    implementation("androidx.activity:activity-compose:1.9.1")
+    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    implementation("androidx.compose.animation:animation:1.7.0-beta07")
+    implementation("androidx.compose.animation:animation-core:1.7.0-beta07")
+    implementation("androidx.compose.ui:ui:1.7.0-beta07")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.05.00"))
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -126,13 +126,13 @@ dependencies {
     // compose navigation
     implementation("androidx.navigation:navigation-compose:$navVersion")
     // compose coil
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
     //views coil
-    implementation("io.coil-kt:coil:2.6.0")
+    implementation("io.coil-kt:coil:2.7.0")
     //hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
+    implementation("com.google.dagger:hilt-android:2.52")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    ksp("com.google.dagger:hilt-compiler:2.51.1")
+    ksp("com.google.dagger:hilt-compiler:2.52")
     //moshi
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     implementation("com.squareup.moshi:moshi:1.15.1")
@@ -157,13 +157,13 @@ dependencies {
     implementation("androidx.paging:paging-compose:$pagingVersion")
 
     //truth
-    testImplementation("com.google.truth:truth:1.4.2")
+    testImplementation("com.google.truth:truth:1.4.4")
 
     //palette
     implementation("androidx.palette:palette-ktx:1.0.0")
 
     //work
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("androidx.hilt:hilt-work:1.2.0")
 
     //views material
@@ -173,5 +173,5 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     //serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 }

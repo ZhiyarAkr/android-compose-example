@@ -36,6 +36,7 @@ import com.akz.cinema.ui.screen.home.HomeScreenRoute
 import com.akz.cinema.ui.screen.home.homeScreenNavGraph
 import com.akz.cinema.ui.screen.saved.savedScreenGraph
 import com.akz.cinema.ui.screen.search.searchScreenNavGraph
+import com.akz.cinema.ui.screen.test.testScreenNavGraph
 
 
 val LocalHideNavBar = compositionLocalOf {
@@ -99,7 +100,7 @@ fun AppNavigation(
                     screen = screen,
                     onBackPressed = {
                         if (canGoBack.value) {
-                            navController.popBackStack()
+                            navController.navigateUp()
                         }
                     },
                     scrollBehavior = scrollBehavior
@@ -129,7 +130,7 @@ fun AppNavigation(
                         sharedTransitionScope = this@SharedTransitionLayout
                     )
                     detailScreenNavGraph(
-                        onBackPressed = navController::popBackStack,
+                        onBackPressed = navController::navigateUp,
                         sharedTransitionScope = this@SharedTransitionLayout
                     )
                     searchScreenNavGraph(
@@ -143,6 +144,10 @@ fun AppNavigation(
                         },
                         sharedTransitionScope = this@SharedTransitionLayout
                     )
+
+
+                    // must be deleted
+//                    testScreenNavGraph()
                 }
             }
         }

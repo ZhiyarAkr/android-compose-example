@@ -16,27 +16,17 @@ enum class Screen(
 ) {
     Home(
         NavDestination::isHomeScreen,
-        hasTopBar = false,
-        topBarTitle = null,
-        topAppBarScrollable = false
     ),
     Detail(
         NavDestination::isDetailScreen,
-        hasTopBar = true,
-        hasNavigationBar = false,
-        hasBackBtn = true
+        hasNavigationBar = false
     ),
     Search(
         NavDestination::isSearchScreenCurrentDestination,
-        hasTopBar = false,
-        hasBackBtn = false,
         hasNavigationBar = true,
-        topBarTitle = null
     ),
     Saved(
         NavDestination::isSavedCurrentDestination,
-        hasTopBar = false,
-        hasBackBtn = false,
         hasNavigationBar = true
     )
 }
