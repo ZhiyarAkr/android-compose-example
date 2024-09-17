@@ -36,7 +36,6 @@ import com.akz.cinema.ui.screen.home.HomeScreenRoute
 import com.akz.cinema.ui.screen.home.homeScreenNavGraph
 import com.akz.cinema.ui.screen.saved.savedScreenGraph
 import com.akz.cinema.ui.screen.search.searchScreenNavGraph
-import com.akz.cinema.ui.screen.test.testScreenNavGraph
 
 
 val LocalHideNavBar = compositionLocalOf {
@@ -144,10 +143,6 @@ fun AppNavigation(
                         },
                         sharedTransitionScope = this@SharedTransitionLayout
                     )
-
-
-                    // must be deleted
-//                    testScreenNavGraph()
                 }
             }
         }

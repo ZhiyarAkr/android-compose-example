@@ -12,8 +12,6 @@ import com.akz.cinema.ui.screen.saved.isSavedCurrentDestination
 import com.akz.cinema.ui.screen.saved.navigateToSavedScreen
 import com.akz.cinema.ui.screen.search.isSearchScreenCurrentDestination
 import com.akz.cinema.ui.screen.search.navigateToSearchScreen
-import com.akz.cinema.ui.screen.test.isTestScreenCurrentDestination
-import com.akz.cinema.ui.screen.test.navigateToTestScreen
 
 enum class NavigationItem(
     val title: String,
@@ -56,16 +54,5 @@ enum class NavigationItem(
             .setRestoreState(true)
             .setPopUpTo(HomeScreenRoute, false)
             .build()
-    )/*,
-    Test(
-        title = "360",
-        selectedIcon = R.drawable.test,
-        unSelectedIcon = R.drawable.test_outline,
-        isCurrentDestination = NavDestination::isTestScreenCurrentDestination,
-        navigateTo = NavController::navigateToTestScreen,
-        navOptions = NavOptions.Builder()
-            .setRestoreState(true)
-            .setPopUpTo(HomeScreenRoute, false)
-            .build()
-    )*/
+    )
 }
